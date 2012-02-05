@@ -501,7 +501,7 @@ function gameInfo(id, name) {
 		success: function(xml) {
 			$().toastmessage('showNormalToast', '<div id="infoblock" class="ui-grid-a"><div id="infoblock1" class="ui-block-a"></div><div id="infoblock2" class="ui-block-b"></div></div>');
 			$('.toast-container').css('margin-left','-'+$('.toast-container').width()/2+'px');
-			var cover = '<img align="left" src="covers/'+id+'.jpg" style="width:'+($('#infoblock1').width()-10)+'px;"><br/>Tools<br/><a onclick="launchGame("'+id+'")" href="#" data-role="button" data-inline="true">Play Game</a><a onclick="addFav()" href="#" data-role="button" data-inline="true">Add to favorites</a><br/><a onclick="$().toastmessage(\'removeToast\',$(\'.toast-type-normal\'))" href="#" data-role="button" data-inline="true">Close</a>'
+			var cover = '<img align="left" src="covers/'+id+'.jpg" style="width:'+($('#infoblock1').width()-10)+'px;"><br/>Tools<br/><a onclick="launchGame(\"'+id+'\")" href="#" data-role="button" data-inline="true">Play Game</a><br/><a onclick="addFav()" href="#" data-role="button" data-inline="true">Add to favorites</a><br/><a onclick="$().toastmessage(\'removeToast\',$(\'.toast-type-normal\'))" href="#" data-role="button" data-inline="true">Close</a>'
 			$(cover).appendTo('#infoblock1');
 			var title;
 			if ($(xml).find('title').text()=="No Title") var title = unescape(name);
