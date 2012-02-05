@@ -1,0 +1,9 @@
+Hello there!
+
+Here you can download the latest (unminified) code for the xK3y Web Interface!
+Feel free to make changes or improvements for either private use or Pull Requests.
+(If you have some great improvements, please make them a Pull Request)
+
+Main code is located in www/js/code.js
+www/data.xml is an example data.xml file
+www/game.xml is an example game.xml file

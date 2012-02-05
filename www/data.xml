@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<XKEY>
+<GUISTATE>2</GUISTATE>
+<EMERGENCY>2</EMERGENCY>
+<GAMES>
+<MOUNT NAME="My_Book">
+<DIR NAME="Hack &apos;n Slash">
+<ISO>
+<TITLE>Brutal Legend</TITLE>
+<ID>8f21c54b0ea58abf9f4d446e6abe3ba38b56fa11</ID>
+</ISO>
+</DIR>
+<DIR NAME="Music">
+<ISO>
+<TITLE>Guitar Hero Warriors of Rock</TITLE>
+<ID>df4fea8fce85a77884829938e8958956a5e91fae</ID>
+</ISO>
+</DIR>
+<DIR NAME="Racing">
+<ISO>
+<TITLE>Burnout Paradise</TITLE>
+<ID>fe4b0175639b21eed78625e23f76de0acb60c0e8</ID>
+</ISO>
+<ISO>
+<TITLE>Forza 4 DVD 1</TITLE>
+<ID>9e2f4e07d49f9e9c436cbbbddc62afb59093defc</ID>
+</ISO>
+<ISO>
+<TITLE>Forza 4 DVD 2</TITLE>
+<ID>b2a53a44ff9f8efe75139f521ab4a49eed0b1834</ID>
+</ISO>
+</DIR>
+<DIR NAME="Shooters">
+<DIR NAME="Free-Roam">
+<ISO>
+<TITLE>GTA IV Complete DVD 1</TITLE>
+<ID>ad510ca8d6d6467a01608afb9aab8e24008ddf45</ID>
+</ISO>
+<ISO>
+<TITLE>GTA IV Complete DVD 2</TITLE>
+<ID>538b824034f52f57017231ca5a72aa5b740cdd06</ID>
+</ISO>
+<ISO>
+<TITLE>Just Cause 2</TITLE>
+<ID>9ef95c926299e0f6af88fddf0390dbb912165f01</ID>
+</ISO>
+<ISO>
+<TITLE>LA Noire DVD 1</TITLE>
+<ID>f16028eb36eccdb691a4f668d2c67b1dfbce7cf9</ID>
+</ISO>
+<ISO>
+<TITLE>LA Noire DVD 2</TITLE>
+<ID>49c415b035b7d8e0593baad0f7b52a80954194d5</ID>
+</ISO>
+<ISO>
+<TITLE>LA Noire DVD 3</TITLE>
+<ID>22f4b23e18cde5c34f69b623f96bd0e8b0292406</ID>
+</ISO>
+<ISO>
+<TITLE>Red Faction Armageddon</TITLE>
+<ID>fc5e4d3d9684768817cf715562955bd1d6651e2f</ID>
+</ISO>
+<ISO>
+<TITLE>Saints Row 1</TITLE>
+<ID>10f8b9a1f9f0803c59202c52d7115c8e92a05bc9</ID>
+</ISO>
+<ISO>
+<TITLE>Saints Row 2</TITLE>
+<ID>6cb2c2e5d7ae0f30bdbf04551886ce3578633c82</ID>
+</ISO>
+</DIR>
+<ISO>
+<TITLE>Brink</TITLE>
+<ID>ed8c27c72df81e5dfdb3a74319407ab58989b0b9</ID>
+</ISO>
+<ISO>
+<TITLE>Dead Island</TITLE>
+<ID>8da77abcb7f97dd3c46e30e4174d958b12d5080d</ID>
+</ISO>
+<ISO>
+<TITLE>Gears of War 2</TITLE>
+<ID>2022b9cbf91ffd1c8b1e8ec7d4fefccd47fd4808</ID>
+</ISO>
+<ISO>
+<TITLE>Gears of War 3</TITLE>
+<ID>76c95b2d57a0fb2bbc68158ff6ff8b4383a439b7</ID>
+</ISO>
+<ISO>
+<TITLE>Rage DVD 1</TITLE>
+<ID>eb0af5f14486fdd28ebffcdac21a3c49e8338fc3</ID>
+</ISO>
+<ISO>
+<TITLE>Rage DVD 2</TITLE>
+<ID>a0c539e167df88a8cc4cb652bc5f16d2233fdf82</ID>
+</ISO>
+</DIR>
+<DIR NAME="Sport">
+<ISO>
+<TITLE>Mirrors Edge</TITLE>
+<ID>19dccaa6dd5d75fcb4f4139a04322a45e1ee401d</ID>
+</ISO>
+<ISO>
+<TITLE>Skate 3</TITLE>
+<ID>a309db163478e0c542961eaece83a26dbc7786bb</ID>
+</ISO>
+</DIR>
+</MOUNT>
+</GAMES>
+<ABOUT>
+<ITEM NAME="Language">English</ITEM>
+<ITEM NAME="App">01.06</ITEM>
+<ITEM NAME="FPGA">80.35</ITEM>
+<ITEM NAME="Drive">DG16D2S</ITEM>
+<ITEM NAME="FWVer">02510C</ITEM>
+<ITEM NAME="Key">DVD Key here</ITEM>
+<ITEM NAME="HWVer">A0A0</ITEM>
+<ITEM NAME="Serial">Serial</ITEM>
+<ITEM NAME="SSID">SSID</ITEM>
+<ITEM NAME="IP">192.168.0.22</ITEM>
+<ITEM NAME="FS">vfat</ITEM>
+</ABOUT>
+<TRAYSTATE>1</TRAYSTATE>
+</XKEY>

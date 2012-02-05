@@ -1,0 +1,99 @@
+<!DOCTYPE HTML> 
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>xK3y Remote Web Interface</title>
+<link type="text/css" rel="stylesheet" href="js/min.css" />
+<link type="text/css" rel="stylesheet" href="js/galleria.classic.css"/>
+<link rel="shortcut icon" type="image/x-icon" href="img/icon.ico">
+<script type="text/javascript" src="js/min.js"></script>
+<script type="text/javascript" src="js/code.js"></script>
+</head>
+<body onload="getData()" bgcolor="#222222">
+	<center>
+	<!--Home page-->
+	<div data-role="page" id="menu" data-title="Menu">
+		<!--Logo will be placed here-->
+		<div data-role="header">
+			<h1>Welcome</h1>
+		</div>
+		<div data-role="content">
+			<a href="#slide" data-role="button" data-icon="star">Cover Slide</a>
+			<a href="#alpha" data-role="button" data-icon="search">Game Listing</a>
+			<a href="#chooser" data-role="button" data-icon="grid">Folder Structure</a>
+			<a href="#about" data-role="button" data-icon="info">About</a>
+		</div>
+		<div data-role="footer">
+			<h4>xK3y Remote Web Interface</h4>
+		</div>
+	</div>
+	
+	<!--Cover flow page-->
+	<div data-role="page" id="slide" data-title="Cover Slide">
+		<!--Logo will be placed here-->
+		<div data-role="header">
+			<a href="#menu" data-direction="reverse" data-icon="home">Home</a>
+			<h1>Cover Slide</h1>
+		</div>
+		<div id="slidepage" data-role="content"></div>
+		<div class="ui-bar ui-bar-a">
+			<a href="javascript:$.mobile.silentScroll();" data-icon="arrow-u" data-iconpos="notext">Top</a><br/>
+			<h4>xK3y Remote Web Interface</h4>
+		</div>
+	</div>
+	
+	<!--Game List page-->
+	<div data-role="page" id="alpha" data-title="Game Listing">
+		<!--Logo will be placed here-->
+		<div id="IEFix" data-role="header">
+			<a href="#menu" data-direction="reverse" data-icon="home">Home</a>
+			<h1>Game Listing</h1>
+			<div data-role="navbar" data-iconpos="bottom">
+				<ul>
+					<li><a href="#" onclick="$('#speclister').hide();$('#lister').show();" data-icon="search" class="ui-btn-active">Alpabetic</a></li>
+					<li><a href="#" onclick="getRecent();" data-icon="refresh">Recent</a></li>
+					<li><a href="#" onclick="getMostPlayed();" data-icon="star">Most Played</a></li>
+				</ul>
+			</div>
+		</div>
+		<div id="lister" style="padding:10px;padding-top:0px;" data-role="content">
+			<ul id="isolist" data-role="listview" data-filter="true" data-inset="true"></ul>
+		</div>
+		<div id="speclister" style="padding:10px;padding-top:0px;display:none;" data-role="content"></div>
+		<div class="ui-bar ui-bar-a">
+			<a href="javascript:$.mobile.silentScroll();" data-icon="arrow-u" data-iconpos="notext">Top</a><br/>
+			<h4>xK3y Remote Web Interface</h4>
+		</div>
+	</div>
+
+	<!--Folder Structure page-->
+	<div data-role="page" id="chooser" data-title="Folder Structure">
+		<!--Logo will be placed here-->
+		<div data-role="header">
+			<a href="#menu" data-direction="reverse" data-icon="home">Home</a>
+			<h1>Folder Structure</h1>
+		</div>
+		<div id="content" data-role="content"></div>
+		<div class="ui-bar ui-bar-a">
+			<a href="javascript:$.mobile.silentScroll();" data-icon="arrow-u" data-iconpos="notext">Top</a><br/>
+			<h4>xK3y Remote Web Interface</h4>
+		</div>
+	</div>
+	
+	<!--About page-->
+	<div data-role="page" id="about" data-title="About">
+		<!--Logo will be placed here-->
+		<div data-role="header">
+			<a href="#menu" data-direction="reverse" data-icon="home">Home</a>
+			<h1>About</h1>
+		</div>
+		<div id="info" data-role="content"></div>
+		<div class="ui-bar ui-bar-a">
+			<a href="javascript:$.mobile.silentScroll();" data-icon="arrow-u" data-iconpos="notext">Top</a><br/>
+			<h4>xK3y Remote Web Interface</h4>
+		</div>
+	</div>
+</center>
+</body>
+</html>
