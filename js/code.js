@@ -1,6 +1,6 @@
 //Remove all toasts on pagechange event
 $(document).delegate(document, "pagebeforechange", function( e, data ) {
-	if ($('.toast-container')) $().toastmessage('removeToast',$('.toast-type-normal'));
+	if ($('.toast-container')) $().toastmessage('removeToast',$('.toast-item'));
 });
 
 //Add fitted logos to all pages
@@ -383,6 +383,27 @@ function prepGame(id, name) {
 //Actually loads the game
 function launchGame(id) {
    var url = "launchgame.sh?"+id;
+   $.ajax({
+		type: "GET",
+		url: "data.xml",
+		dataType: "xml",
+		cache: false,
+		success: function(xml) {
+			var tray = $(xml).find('TRAYSTATE').text();
+			var guistate = $(xml).find("GUISTATE").text();
+			if (tray == 0) {
+                return;
+            } else {
+                if (tray == 1 && guistate == 1) {
+                    $().toastmessage('showNoticeToast', 'Please open your DVD tray.');
+                } else {
+                    if (tray == 1 && guistate == 2) {
+                        $().toastmessage('showNoticeToast', 'A game appears to be already loaded, please open your DVD tray and click "Play Game" again.');
+                    }
+                }
+			}
+		}
+	});
    $.get(url);
    //Experimental error system, still needs work
    //var t=setTimeout("getErrors()", 3000);
@@ -501,7 +522,7 @@ function gameInfo(id, name) {
 		success: function(xml) {
 			$().toastmessage('showNormalToast', '<div id="infoblock" class="ui-grid-a"><div id="infoblock1" class="ui-block-a"></div><div id="infoblock2" class="ui-block-b"></div></div>');
 			$('.toast-container').css('margin-left','-'+$('.toast-container').width()/2+'px');
-			var cover = '<img align="left" src="covers/'+id+'.jpg" style="width:'+($('#infoblock1').width()-10)+'px;"><br/>Tools<br/><a onclick="launchGame(\"'+id+'\")" href="#" data-role="button" data-inline="true">Play Game</a><br/><a onclick="addFav()" href="#" data-role="button" data-inline="true">Add to favorites</a><br/><a onclick="$().toastmessage(\'removeToast\',$(\'.toast-type-normal\'))" href="#" data-role="button" data-inline="true">Close</a>'
+			var cover = '<img align="left" src="covers/'+id+'.jpg" style="width:'+($('#infoblock1').width()-10)+'px;"><br/>Tools<br/><a onclick="launchGame(\''+id+'\')" href="#" data-role="button" data-inline="true">Play Game</a><br/><a onclick="addFav()" href="#" data-role="button" data-inline="true">Add to favorites</a><br/><a onclick="$().toastmessage(\'removeToast\',$(\'.toast-item\'))" href="#" data-role="button" data-inline="true">Close</a>'
 			$(cover).appendTo('#infoblock1');
 			var title;
 			if ($(xml).find('title').text()=="No Title") var title = unescape(name);
@@ -516,7 +537,8 @@ function gameInfo(id, name) {
 		},
 		error: function(xml) {
 			//No game.xml? Probably old firmware
-			$().toastmessage('showErrorToast', 'Error reading {gameName}.xml, are you on the latest firmware?');
+			$().toastmessage('showErrorToast', '<div class="errorblock1">Error reading {gameName}.xml, are you on the latest firmware?<br/><a onclick="launchGame(\''+id+'\')" href="#" data-role="button" data-inline="true">Play Game Anyway</a></div>');
+			$('.errorblock1').trigger('create');
 			$('.toast-container').css('margin-left','-'+$('.toast-container').width()/2+'px');
 		}
 	});
