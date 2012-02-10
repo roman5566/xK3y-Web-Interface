@@ -1,11 +1,12 @@
 //Remove all toasts on pagechange event
 $(document).delegate(document, "pagebeforechange", function( e, data ) {
-	if ($('.toast-container')) $().toastmessage('removeToast',$('.toast-item'));
+	//if ($('.toast-container').length!=0) $('#popup').dialog('close');
 });
 
 //Add fitted logos to all pages
 $(document).ready(function() {
-	$('[data-role="page"]').each(function() {$(this).prepend('<img id="logo" src="img/logo.png" style="max-width:'+$(window).width()+"px"+';">')});
+	$('[data-role="page"]').each(function() {$(this).prepend('<img class="logo" src="img/logo.png" style="max-width:'+$(window).width()+"px"+';">')});
+	$('center').append('<div data-role="page" id="popup" data-theme="a" data-title="Popup"><img class="logo" src="img/logo.png" style="max-width:'+$(window).width()+"px"+';"></div>');
 });
 
 //Event to create Cover Slide
@@ -20,7 +21,7 @@ $(document).delegate('#chooser', 'pagecreate',function(event) {
 
 //Some fixes for nested folders in Folder Structure
 $(document).delegate(':jqmData(url^=chooser)', 'pagebeforecreate', function(event) { 
-	$(this).filter(':jqmData(url*=ui-page)').prepend('<img id="logo" src="img/logo.png" style="max-width:'+$(window).width()+"px"+';">');
+	$(this).filter(':jqmData(url*=ui-page)').prepend('<img class="logo" src="img/logo.png" style="max-width:'+$(window).width()+"px"+';">');
 	$(this).filter(':jqmData(url*=ui-page)').append('<div class="ui-bar ui-bar-a"><a href="javascript:$.mobile.silentScroll();" data-icon="arrow-u" data-iconpos="notext">Top</a><br><h4>xK3y Remote Web Interface</h4></div>');
 	$(this).filter(':jqmData(url*=ui-page)').find(':jqmData(role=header)').prepend('<a href="#menu" data-direction="reverse" data-icon="home">Home</a>') 
 }); 
@@ -184,9 +185,9 @@ function getFolderStructure() {
 //Create the About screen
 function getAbout() {
 	//Current Web Interface version, update it!
-	var version = "1.07";
+	var version = "1.08";
 	//Long HTML ftw
-	$("#info").html('<ul data-role="listview" data-inset="true"><li>Web Interface version '+version+'</li><li>Interface created using jQuery Mobile</li><li>Cover Slide created using Galleria</li><li>Interface made by Mr_Waffle</li><li>Like this interface? Please consider supporting me! (I\'ve worked hard on it :D)</li><li><form data-role="none" action="https://www.paypal.com/cgi-bin/webscr" method="post"><input type="hidden" name="cmd" value="_s-xclick"><input type="hidden" name="hosted_button_id" value="N74W4ER6ANH7S"><input data-role="none" type="image" src="img/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!"><img alt="" border="0" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1" height="1"></form></li></ul><a id="resetStatsButton" href="#" onclick="resetStats()" data-inline="true" data-role="button">Reset Game Stats</a>');
+	$("#info").html('<ul data-role="listview" data-inset="true"><li>Web Interface version '+version+'</li><li>Interface created using jQuery Mobile</li><li>Cover Slide created using Galleria</li><li>Interface made by Mr_Waffle</li></ul><a id="resetStatsButton" href="#" onclick="resetStats()" data-inline="true" data-role="button">Reset Game Stats</a>');
 	$('<ul id="infolist" data-role="listview" data-inset="true">').prependTo("#info");
 	//All the info items from the xK3y
 	for (var i=0; i<data.about.length; i++) {
@@ -338,33 +339,11 @@ function getRecent() {
 
 //Game chosen? Sweet! We need to do some stuff first though...
 function prepGame(id, name) {
+	//Delete any toasts there are right now
+	//if ($('.toast-container')) $().toastmessage('removeToast',$('.toast-item'));
 	//Show the game info from appropriate XML file
 	//Huge design issue right now when on smaller screens, someone a suggestion?
 	gameInfo(id, name);
-	//From older popup system, yet to be integrated into the new design
-	/*$.ajax({
-		type: "GET",
-		url: "data.xml",
-		dataType: "xml",
-		cache: false,
-		success: function(xml) {
-			var tray = $(xml).find('TRAYSTATE').text();
-			var guistate = $(xml).find("GUISTATE").text();
-			if (tray == 0) {
-                var tray = "Your tray appears to be already open, have fun!"
-            } else {
-                if (tray == 1 && guistate == 1) {
-                    var tray = "Please open your DVD tray."
-                } else {
-                    if (tray == 1 && guistate == 2) {
-                        var tray = 'A game appears to be already loaded, please open your DVD tray and click "Load Game Again".'
-                    }
-                }
-			}
-			$('#gameName').html(unescape(name));
-			$('#trayState').html(tray);
-		}
-	});*/
 	//There's a bug with the iPad if we're fullscreen in Cover Slide, kick it out.
 	//I don't know if there're other devices that have it, so we just always kick it out
 	var CoverSlide = Galleria.get(0);
@@ -392,10 +371,11 @@ function launchGame(id) {
 			var tray = $(xml).find('TRAYSTATE').text();
 			var guistate = $(xml).find("GUISTATE").text();
 			if (tray == 0) {
-                return;
+                $.get(url);
             } else {
                 if (tray == 1 && guistate == 1) {
                     $().toastmessage('showNoticeToast', 'Please open your DVD tray.');
+					$.get(url);
                 } else {
                     if (tray == 1 && guistate == 2) {
                         $().toastmessage('showNoticeToast', 'A game appears to be already loaded, please open your DVD tray and click "Play Game" again.');
@@ -404,7 +384,6 @@ function launchGame(id) {
 			}
 		}
 	});
-   $.get(url);
    //Experimental error system, still needs work
    //var t=setTimeout("getErrors()", 3000);
 }
@@ -514,32 +493,48 @@ function getErrors() {
 //Messy as hell
 function gameInfo(id, name) {
 	var url = 'covers/'+id+'.xml';
+	//Haxxed dialog
+	$('<a href="#popup" data-rel="dialog">').appendTo('body').click().remove();
 	$.ajax({
 		type: "GET",
 		url: url,
 		dataType: "xml",
 		cache: false,
 		success: function(xml) {
-			$().toastmessage('showNormalToast', '<div id="infoblock" class="ui-grid-a"><div id="infoblock1" class="ui-block-a"></div><div id="infoblock2" class="ui-block-b"></div></div>');
-			$('.toast-container').css('margin-left','-'+$('.toast-container').width()/2+'px');
-			var cover = '<img align="left" src="covers/'+id+'.jpg" style="width:'+($('#infoblock1').width()-10)+'px;"><br/>Tools<br/><a onclick="launchGame(\''+id+'\')" href="#" data-role="button" data-inline="true">Play Game</a><br/><a onclick="addFav()" href="#" data-role="button" data-inline="true">Add to favorites</a><br/><a onclick="$().toastmessage(\'removeToast\',$(\'.toast-item\'))" href="#" data-role="button" data-inline="true">Close</a>'
-			$(cover).appendTo('#infoblock1');
+			if ($('#infoblock').length==0) {
+				$().toastmessage('showNormalToast', '<div id="infoblock" class="ui-grid-a"><div id="infoblock1" class="ui-block-a"></div><div id="infoblock2" class="ui-block-b"></div></div>');
+				$('.toast-container').css('margin-left','-'+$('.toast-container').width()/2+'px');
+				$('.toast-container').css('top',$('.logo')[0].height+'px');
+			}
+			var cover = '<img align="left" src="covers/'+id+'.jpg" style="width:'+($('#infoblock1').width()-10)+'px;"><br/>Tools<br/><a onclick="launchGame(\''+id+'\')" href="#" data-role="button" data-inline="true">Play Game</a><br/><a onclick="addFav()" href="#" data-role="button" data-inline="true">Add to favorites</a><br/><a onclick="$(\'#popup\').dialog(\'close\');$().toastmessage(\'removeToast\',$(\'.toast-item\'))" href="#" data-role="button" data-inline="true">Close</a>'
+			$('#infoblock1').html(cover);
 			var title;
 			if ($(xml).find('title').text()=="No Title") var title = unescape(name);
 			else title = $(xml).find('title').text();
 			var info = '<div style="padding:5px;"><big><big><big>'+title+'</big></big></big><br/><br/><div id="infoItems"></div><br/>'+$(xml).find('summary').text()+'<br/></div>';
-			$(info).appendTo('#infoblock2');
-			var infoitems;
+			$('#infoblock2').html(info);
+			var infoitems="";
 			$(xml).find('infoitem').each(function() {
-				$('#infoItems').append($(this).text()+'<br/>');
+				infoitems+=$(this).text()+'<br/>';
 			});
+			$('#infoItems').html(infoitems);
 			$('#infoblock').trigger('create');
 		},
 		error: function(xml) {
 			//No game.xml? Probably old firmware
-			$().toastmessage('showErrorToast', '<div class="errorblock1">Error reading {gameName}.xml, are you on the latest firmware?<br/><a onclick="launchGame(\''+id+'\')" href="#" data-role="button" data-inline="true">Play Game Anyway</a></div>');
-			$('.errorblock1').trigger('create');
-			$('.toast-container').css('margin-left','-'+$('.toast-container').width()/2+'px');
+			if ($('#infoblock').length==0) {
+				$().toastmessage('showNormalToast', '<div id="infoblock" class="ui-grid-a"><div id="infoblock1" class="ui-block-a"></div><div id="infoblock2" class="ui-block-b"></div></div>');
+				$('.toast-container').css('margin-left','-'+$('.toast-container').width()/2+'px');
+				$('.toast-container').css('top',$('.logo')[0].height+20+'px');
+			}
+			var cover = '<img align="left" src="covers/'+id+'.jpg" style="width:'+($('#infoblock1').width()-10)+'px;"><br/>Tools<br/><a onclick="launchGame(\''+id+'\')" href="#" data-role="button" data-inline="true">Play Game</a><br/><a onclick="addFav()" href="#" data-role="button" data-inline="true">Add to favorites</a><br/><a onclick="$(\'#popup\').dialog(\'close\');$().toastmessage(\'removeToast\',$(\'.toast-item\'))" href="#" data-role="button" data-inline="true">Close</a>'
+			$('#infoblock1').html(cover);
+			var title = unescape(name);
+			var info = '<div style="padding:5px;"><big><big><big>'+title+'</big></big></big><br/><br/><div id="infoItems"></div><br/>No Summary<br/></div>';
+			$('#infoblock2').html(info);
+			var infoitems="No Additional Info";
+			$('#infoItems').html(infoitems);
+			$('#infoblock').trigger('create');
 		}
 	});
 }
