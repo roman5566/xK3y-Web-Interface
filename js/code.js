@@ -139,7 +139,7 @@ function getFolderStructure() {
 	var timesPlayed;
 	//Create directories first
 	for (var i=0; i<data.dirs.length; i++) {
-		dir = data.dirs[i].dir;
+		dir = escape(data.dirs[i].dir);
 		par = data.dirs[i].par;
 		chk = data.drives.toString().indexOf(par);
 		//What if the parent directory is a HDD? Make it the content block
@@ -155,7 +155,7 @@ function getFolderStructure() {
 	for (var i=0; i<data.ISOlist.length; i++) {
 		id = data.ISOlist[i].id;
 		name = data.ISOlist[i].name;
-		par = data.ISOlist[i].par;
+		par = escape(data.ISOlist[i].par);
 		cover = data.ISOlist[i].image;
 		chk = data.drives.toString().indexOf(par);
 		JSON = eval('('+readCookie(id)+')');
@@ -375,10 +375,12 @@ function launchGame(id) {
             } else {
                 if (tray == 1 && guistate == 1) {
                     $().toastmessage('showNoticeToast', 'Please open your DVD tray.');
+					$('html,body').animate({scrollTop: document.body.scrollHeight}, 1000);
 					$.get(url);
                 } else {
                     if (tray == 1 && guistate == 2) {
                         $().toastmessage('showNoticeToast', 'A game appears to be already loaded, please open your DVD tray and click "Play Game" again.');
+						$('html,body').animate({scrollTop: document.body.scrollHeight}, 1000);
                     }
                 }
 			}
@@ -506,7 +508,7 @@ function gameInfo(id, name) {
 				$('.toast-container').css('margin-left','-'+$('.toast-container').width()/2+'px');
 				$('.toast-container').css('top',$('.logo')[0].height+'px');
 			}
-			var cover = '<img align="left" src="covers/'+id+'.jpg" style="width:'+($('#infoblock1').width()-10)+'px;"><br/>Tools<br/><a onclick="launchGame(\''+id+'\')" href="#" data-role="button" data-inline="true">Play Game</a><br/><a onclick="addFav()" href="#" data-role="button" data-inline="true">Add to favorites</a><br/><a onclick="$(\'#popup\').dialog(\'close\');$().toastmessage(\'removeToast\',$(\'.toast-item\'))" href="#" data-role="button" data-inline="true">Close</a>'
+			var cover = '<img align="left" src="covers/'+id+'.jpg" style="width:'+($('#infoblock1').width()-10)+'px;"><br/>Tools<a onclick="launchGame(\''+id+'\')" href="#" data-role="button">Play Game</a><a onclick="addFav()" href="#" data-role="button">Add to favorites</a><a onclick="$(\'#popup\').dialog(\'close\');$().toastmessage(\'removeToast\',$(\'.toast-item\'))" href="#" data-role="button">Close</a>'
 			$('#infoblock1').html(cover);
 			var title;
 			if ($(xml).find('title').text()=="No Title") var title = unescape(name);
@@ -527,7 +529,7 @@ function gameInfo(id, name) {
 				$('.toast-container').css('margin-left','-'+$('.toast-container').width()/2+'px');
 				$('.toast-container').css('top',$('.logo')[0].height+20+'px');
 			}
-			var cover = '<img align="left" src="covers/'+id+'.jpg" style="width:'+($('#infoblock1').width()-10)+'px;"><br/>Tools<br/><a onclick="launchGame(\''+id+'\')" href="#" data-role="button" data-inline="true">Play Game</a><br/><a onclick="addFav()" href="#" data-role="button" data-inline="true">Add to favorites</a><br/><a onclick="$(\'#popup\').dialog(\'close\');$().toastmessage(\'removeToast\',$(\'.toast-item\'))" href="#" data-role="button" data-inline="true">Close</a>'
+			var cover = '<img align="left" src="covers/'+id+'.jpg" style="width:'+($('#infoblock1').width()-10)+'px;"><br/>Tools<a onclick="launchGame(\''+id+'\')" href="#" data-role="button">Play Game</a><a onclick="addFav()" href="#" data-role="button">Add to favorites</a><a onclick="$(\'#popup\').dialog(\'close\');$().toastmessage(\'removeToast\',$(\'.toast-item\'))" href="#" data-role="button">Close</a>'
 			$('#infoblock1').html(cover);
 			var title = unescape(name);
 			var info = '<div style="padding:5px;"><big><big><big>'+title+'</big></big></big><br/><br/><div id="infoItems"></div><br/>No Summary<br/></div>';
