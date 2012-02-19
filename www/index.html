@@ -8,12 +8,13 @@
 <link type="text/css" rel="stylesheet" href="js/galleria.classic.css"/>
 <link rel="shortcut icon" type="image/x-icon" href="img/icon.ico">
 <script type="text/javascript" src="js/min.js"></script>
+<script type="text/javascript" src="js/json.js"></script>
 <script type="text/javascript" src="js/code.js"></script>
 </head>
 <body onload="getData()" bgcolor="#222222">
 	<center>
 	<!--Home page-->
-	<div data-role="page" id="menu" data-title="Menu">
+	<div data-role="page" id="menu" data-title="xK3y Remote Web Interface">
 		<!--Logo will be placed here-->
 		<div data-role="header">
 			<h1>Welcome</h1>
@@ -53,7 +54,8 @@
 				<ul>
 					<li><a href="#" onclick="$('#speclister').hide();$('#lister').show();" data-icon="search" class="ui-btn-active">Alpabetic</a></li>
 					<li><a href="#" onclick="getRecent();" data-icon="refresh">Recent</a></li>
-					<li><a href="#" onclick="getMostPlayed();" data-icon="star">Most Played</a></li>
+					<li><a href="#" onclick="getMostPlayed();" data-icon="refresh">Most Played</a></li>
+					<li><a href="#" onclick="getFavLists();" data-icon="star">Fav Lists</a></li>
 				</ul>
 			</div>
 		</div>
@@ -94,6 +96,7 @@
 			<h4>xK3y Remote Web Interface</h4>
 		</div>
 	</div>
+	
 </center>
 </body>
 </html>
