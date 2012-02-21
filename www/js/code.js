@@ -38,6 +38,7 @@ $(document).delegate('#alpha', 'pagecreate',function(event) {
 
 //Some global variables needed
 var data;
+var saveData;
 var scrollPosition;
 
 //Main function, grabs all data from xk3y and parses it
@@ -45,8 +46,8 @@ function getData() {
 	$.ajax({
 		type: "GET",
 		url: "data.xml",
-		cache: false,
 		dataType: "xml",
+		cache: false,
 		success: function(xml) {
 			var dirs = [];
 			var ISOlist = [];
@@ -100,9 +101,27 @@ function getData() {
 				"drives" : drives, 
 				"about" : about 
 			};
-			//Experimental pre-loading of the probably most used menus
-			$.mobile.loadPage('#alpha');
-			$.mobile.loadPage('#chooser');
+			//Serverside storage
+			$.ajax({
+				type: "GET",
+				url: "store.sh",
+				dataType: "json",
+				cache: false,
+				success: function(response) {
+					if (response == null || response == "") {
+						saveData={};
+					}
+					else {
+						saveData=response;
+					}
+					//Experimental pre-loading of the probably most used menus
+					$.mobile.loadPage('#alpha');
+					$.mobile.loadPage('#chooser');
+				}
+				error: function() {
+					
+				}
+			});
 		}
 	});
 }
@@ -139,7 +158,8 @@ function getFolderStructure() {
 	var name;
 	var cover;
 	var chk;
-	var cookie;
+	var stored;
+	var dataChange=false;
 	var timesPlayed;
 	//Create directories first
 	for (var i=0; i<data.dirs.length; i++) {
@@ -162,13 +182,14 @@ function getFolderStructure() {
 		par = escape(data.ISOlist[i].par);
 		cover = data.ISOlist[i].image;
 		chk = data.drives.toString().indexOf(par);
-		cookie = JSON.parse(readCookie(id));
+		stored = saveData[id];
 		//Cookie info, will be replaces with server stored info later on
-		if (cookie == null) {
-			createCookie(id, '{"timesPlayed": 0, "lastPlayed": 0}');
+		if (stored == null) {
+			saveData[id] = {"timesPlayed": 0, "lastPlayed": 0};
 			timesPlayed = 0;
+			dataChange=true;
 		}
-		else timesPlayed = cookie.timesPlayed;
+		else timesPlayed = stored.timesPlayed;
 		//Same parent fix as with directories
 		if (chk!=-1) par1 = "contentlist";
 		else {
@@ -184,6 +205,10 @@ function getFolderStructure() {
 	});
 	//Magic!
 	$('#contentlist').listview();
+	
+	if (dataChange) {
+		$.post('store.sh',JSON.stringify(saveData));
+	}
 }
 
 //Create the About screen
@@ -220,7 +245,8 @@ function getList() {
 	var id;
 	var cover;
 	var letter;
-	var JSON;
+	var stored;
+	var dataChange=false;
 	var timesPlayed;
 	var HTML='';
 	//Add all the games to the list
@@ -229,13 +255,14 @@ function getList() {
 		id = ISOlist[i].id;
 		cover = ISOlist[i].image;
 		letter = iso.charAt(0).toUpperCase();
-		JSON = eval('('+readCookie(id)+')');
+		stored = saveData[id];
 		timesPlayed;
-		if (JSON == null) {
-			createCookie(id, '{"timesPlayed": 0, "lastPlayed": 0}');
+		if (stored == null) {
+			saveData[id] = {"timesPlayed": 0, "lastPlayed": 0};
 			timesPlayed = 0;
+			dataChange=true;
 		}
-		else timesPlayed = JSON.timesPlayed;
+		else timesPlayed = stored.timesPlayed;
 		if (HTML.indexOf(letter+'-divider')==-1) {
 			HTML+='<li id="'+letter+'-divider" data-role="list-divider"><h3>'+letter+'</h3>';
 			//$('<li id="'+letter+'-divider" data-role="list-divider">').html('<h3>'+letter+'</h3>').appendTo("#isolist");
@@ -247,6 +274,10 @@ function getList() {
 	document.getElementById('isolist').innerHTML=HTML;
 	//Magic!
 	$("#isolist").listview();
+	
+	if (dataChange) {
+		$.post('store.sh',JSON.stringify(saveData));
+	}
 }
 
 //Create the Most Played list
@@ -263,9 +294,9 @@ function getMostPlayed() {
 	//$('<li data-role="list-divider">').html('<h3>Most Played</h3>').appendTo("#speclist");
 	//Sort it with how many times it's been selected (to be replaced with server stored info later)
 	ISOlist.sort(function(x,y) { 
-		var JSONx = eval('('+readCookie(x.id)+')');
+		var JSONx = saveData[x.id];
 		var timesPlayedx = JSONx.timesPlayed;
-		var JSONy = eval('('+readCookie(y.id)+')');
+		var JSONy = saveData[y.id];
 		var timesPlayedy = JSONy.timesPlayed;
 		return timesPlayedy - timesPlayedx;
 	});
@@ -274,7 +305,8 @@ function getMostPlayed() {
 	var iso;
 	var id;
 	var covers;
-	var JSON;
+	var stored;
+	var dataChange=false;
 	var timesPlayed;
 	var HTML='<li data-role="list-divider"><h3>Most Played</h3></li>';
 	//Add all the games to the list
@@ -282,10 +314,11 @@ function getMostPlayed() {
 		iso = ISOlist[i].name;
 		id = ISOlist[i].id;
 		cover = ISOlist[i].image;
-		JSON = eval('('+readCookie(id)+')');
-		timesPlayed = JSON.timesPlayed;
+		stored = saveData[id];
+		timesPlayed = stored.timesPlayed;
 		if (timesPlayed == null || timesPlayed==0) {
-			createCookie(id, '{"timesPlayed": 0, "lastPlayed": 0}');
+			saveData[id] = {"timesPlayed": 0, "lastPlayed": 0};
+			dataChange=true;
 			//Never played D: Get the hell out!
 			break;
 		}
@@ -300,7 +333,11 @@ function getMostPlayed() {
 	$("#speclist").listview();
 	//IE makes the bar disappear sometimes, remove and add it back!
 	$('#IEFix').removeClass('ui-header ui-bar-a');
-	$('#IEFix').addClass('ui-header ui-bar-a');	
+	$('#IEFix').addClass('ui-header ui-bar-a');
+	
+	if (dataChange) {
+		$.post('store.sh',JSON.stringify(saveData));
+	}
 }
 
 //Create the Recent list
@@ -315,9 +352,9 @@ function getRecent() {
 	//$('<li data-role="list-divider">').html('<h3>Recently Played</h3>').appendTo("#speclist");
 	//Sort it, will be replaced with server stored info later
 	ISOlist.sort(function(x,y) { 
-		var JSONx = eval('('+readCookie(x.id)+')');
+		var JSONx = saveData[x.id];
 		var lastPlayedx = JSONx.lastPlayed;
-		var JSONy = eval('('+readCookie(y.id)+')');
+		var JSONy = saveData[y.id];
 		var lastPlayedy = JSONy.lastPlayed;
 		return lastPlayedy - lastPlayedx;
 	});
@@ -326,17 +363,19 @@ function getRecent() {
 	var iso;
 	var id;
 	var cover;
-	var JSON;
+	var stored;
 	var lastPlayed;
+	var dataChange=false;
 	var HTML='<li data-role="list-divider"><h3>Recently Played</h3></li>';
 	for (var i=0;i<ISOlist.length;i++) {
 		iso = ISOlist[i].name;
 		id = ISOlist[i].id;
 		cover = ISOlist[i].image;
-		JSON = eval('('+readCookie(id)+')');
-		lastPlayed = JSON.lastPlayed;
+		stored = saveData[id];
+		lastPlayed = stored.lastPlayed;
 		if (lastPlayed == null || lastPlayed==0) {
-			createCookie(id, '{"timesPlayed": 0, "lastPlayed": 0}');
+			saveData[id] = {"timesPlayed": 0, "lastPlayed": 0};
+			dataChange=true;
 			//Never played D: Get the hell out!
 			break;
 		}
@@ -354,6 +393,10 @@ function getRecent() {
 	//IE makes the bar disappear sometimes, remove and add it back!
 	$('#IEFix').removeClass('ui-header ui-bar-a');
 	$('#IEFix').addClass('ui-header ui-bar-a');
+	//If saveData changed, store to server
+	if (dataChange) {
+		$.post('store.sh',JSON.stringify(saveData));
+	}
 }
 
 //Create the fav lists tab
@@ -389,9 +432,10 @@ function prepGame(id, name) {
 		if (CoverSlide.isFullscreen()) CoverSlide.exitFullscreen();
 	}
 	//Update the cookies, soon to be server side storage
-	var JSON = eval('('+readCookie(id)+')');
-	var timesPlayed = JSON.timesPlayed;
-	createCookie(id, '{"timesPlayed":' + (timesPlayed+1) +', "lastPlayed":' + Date.parse(new Date) + '}');
+	var stored = saveData[id];
+	var timesPlayed = stored.timesPlayed;
+	saveData[id] = {"timesPlayed": (timesPlayed+1), "lastPlayed": Date.parse(new Date)};
+	$.post('store.sh',JSON.stringify(saveData));
 	//Update the playtimes on the menu's
 	updatePlayTimes(id);
 	//launchGame(id);
@@ -428,36 +472,13 @@ function launchGame(id) {
    //var t=setTimeout("getErrors()", 3000);
 }
 
-//Some functions to easily communicate with cookies
-//Will be removed once we get server side storage
-function createCookie(name,value) {
-	document.cookie = name+"="+value+"; expires=Mon, 1 Jan 2020 00:00:00 UTC; path=/";
-}
-
-function readCookie(name) {
-	var nameEQ = name + "=";
-	var ca = document.cookie.split(';');
-	for(var i=0;i < ca.length;i++) {
-		var c = ca[i];
-		while (c.charAt(0)==' ') c = c.substring(1,c.length);
-		if (c.indexOf(nameEQ) == 0) {
-			return c.substring(nameEQ.length,c.length);
-		}	
-	}
-	return null;
-}
-
-function eraseCookie(name) {
-	createCookie(name,"",-1);
-}
-
 //Update the menu play times
 function updatePlayTimes(id) {
 	//Specificly update a game
 	if (id) {
 		var data = $('span#'+id);
-		var JSON = eval('('+readCookie(id)+')');
-		var current = JSON.timesPlayed;
+		var stored = saveData[id];
+		var current = stored.timesPlayed;
 		for (var i = 0; i<data.length; i++) {
 			data[i].innerHTML = current + (current == 1 ? " time" : " times");
 		}
@@ -614,14 +635,13 @@ function noFavLists(id, name) {
 //Fav popup
 function addFavPopup(id, name) {
 	//Get all current list data
-	var cookie = readCookie('FavLists');
+	var savedFavLists = saveData['FavLists'];
 	//If there are no lists made yet, create a popup asking for the first list EVAR
-	if ((cookie == "" || cookie == null) && $('#createFavList').length==0) {
+	if (savedFavLists == null && $('#createFavList').length==0) {
 		noFavLists(id, name);
 		return;
 	}
 	//Otherwise, parse the lists
-	var savedFavLists = JSON.parse(cookie);
 	//Get ALL the list names!
 	var favLists = [];
 	for (var i in savedFavLists) {
@@ -645,14 +665,13 @@ function addFavPopup(id, name) {
 //Universal
 function manageFavPopup(id, name) {
 	//Get all current list data
-	var cookie = readCookie('FavLists');
+	var savedFavLists = saveData['FavLists'];
 	//If there are no lists made yet, create a popup asking for the first list EVAR
-	if ((cookie == "" || cookie == null) && $('#createFavList').length==0) {
+	if (savedFavLists == null && $('#createFavList').length==0) {
 		noFavLists(id, name);
 		return;
 	}
 	//Otherwise, parse the lists
-	var savedFavLists = JSON.parse(cookie);
 	//Get ALL the list names!
 	var favLists = [];
 	for (var i in savedFavLists) {
@@ -711,12 +730,9 @@ function createFavList(id, name) {
 	//Create a new list, currently only possible through the popup, so we always get the value from there
 	var listName = escape($('#favListName')[0].value);
 	//Get the currently saved lists
-	var cookie = readCookie('FavLists');
-	var favLists;
+	var favLists = saveData['FavLists'];
 	//No lists? New object
-	if (cookie == "" || cookie == null) favLists={};
-	//Already have lists? Parse them
-	else favLists = JSON.parse(cookie);
+	if (favLists == null) favLists={};
 	var gameList = [];
 	//An ID is given as argument? Populate list with ID and name
 	if (id) {
@@ -734,14 +750,15 @@ function createFavList(id, name) {
 	//Complicated, I know
 	favLists[listName]=gameList;
 	//Stringify that thing and save it
-	createCookie("FavLists",JSON.stringify(favLists));
+	saveData['FavLists'] = JSON.stringify(favLists);
+	$.post('store.sh', JSON.stringify(saveData));
 }
 
 //Add game to selected list, takes no list argument because we only allow adding from the info screen
 function addFav(id, name) {
 	var listName = $('#favListDropDown')[0].value;
 	//We already have a list, otherwise we wouldn't be able to get here, so no need to check for that
-	var favLists = JSON.parse(readCookie('FavLists'));
+	var favLists = saveData['FavLists'];
 	//Get the gameList array from the favLists object with the listName key
 	var gameList = favLists[listName];
 	//Dummy data present? Slice that thing off
@@ -752,7 +769,8 @@ function addFav(id, name) {
 					"name" : name });
 	//Save again
 	favLists[listName]=gameList;
-	createCookie("FavLists",JSON.stringify(favLists));
+	saveData['FavLists'] = JSON.stringify(favLists);
+	$.post('store.sh', JSON.stringify(saveData));
 	//Remove the last toast upon completion
 	$().toastmessage('removeToast',$('.toast-item:last'))
 }
@@ -763,7 +781,7 @@ function removeFav(id, favList) {
 	//Specify favList
 	if (favList) listName = favList;
 	else listName = $('#favListRemoveDropDown')[0].value;
-	var favLists = JSON.parse(readCookie('FavLists'));
+	var favLists = saveData['FavLists'];
 	//Get the gameList array from the favLists object with the listName key
 	var gameList = favLists[listName];
 	//Find the index in the given array with the given ID
@@ -778,13 +796,14 @@ function removeFav(id, favList) {
 	}
 	//Save
 	favLists[listName]=gameList;
-	createCookie("FavLists",JSON.stringify(favLists));
+	saveData['FavLists'] = JSON.stringify(favLists);
+	$.post('store.sh', JSON.stringify(saveData));
 }
 
 //Function to find FavList by ID
 //I'M A FRIGGIN GENIUS
 function findList(id) {
-	var savedFavLists = JSON.parse(readCookie('FavLists'));
+	var savedFavLists = saveData['FavLists']);
 	var foundLists = [];
 	for (var i in savedFavLists) {
 		if (JSON.stringify(savedFavLists[i]).indexOf(id)!=-1) foundLists.push(i);
@@ -794,9 +813,9 @@ function findList(id) {
 
 //Find the index of a game ID
 //Again, genius :D
-function findIndex(gameList, id) {
-	for (var i=0; i<gameList.length; i++) {
-		if (gameList[i].id==id) return i;
+function findIndex(array, id) {
+	for (var i=0; i<array.length; i++) {
+		if (array[i].id==id) return i;
 	}
 	return -1;
 }
