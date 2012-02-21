@@ -47,6 +47,7 @@ function getData() {
 		type: "GET",
 		url: "data.xml",
 		dataType: "xml",
+		cache: false,
 		success: function(xml) {
 			var dirs = [];
 			var ISOlist = [];
@@ -116,6 +117,9 @@ function getData() {
 					//Experimental pre-loading of the probably most used menus
 					$.mobile.loadPage('#alpha');
 					$.mobile.loadPage('#chooser');
+				},
+				error: function() {
+					$().toastmessage('showErrorToast', 'Error loading server storage, old firmware?');
 				}
 			});
 		}
@@ -444,6 +448,7 @@ function launchGame(id) {
 		type: "GET",
 		url: "data.xml",
 		dataType: "xml",
+		cache: false,
 		success: function(xml) {
 			var tray = $(xml).find('TRAYSTATE').text();
 			var guistate = $(xml).find("GUISTATE").text();
@@ -465,29 +470,6 @@ function launchGame(id) {
 	});
    //Experimental error system, still needs work
    //var t=setTimeout("getErrors()", 3000);
-}
-
-//Some functions to easily communicate with cookies
-//Will be removed once we get server side storage
-function createCookie(name,value) {
-	document.cookie = name+"="+value+"; expires=Mon, 1 Jan 2020 00:00:00 UTC; path=/";
-}
-
-function readCookie(name) {
-	var nameEQ = name + "=";
-	var ca = document.cookie.split(';');
-	for(var i=0;i < ca.length;i++) {
-		var c = ca[i];
-		while (c.charAt(0)==' ') c = c.substring(1,c.length);
-		if (c.indexOf(nameEQ) == 0) {
-			return c.substring(nameEQ.length,c.length);
-		}	
-	}
-	return null;
-}
-
-function eraseCookie(name) {
-	createCookie(name,"",-1);
 }
 
 //Update the menu play times
@@ -554,6 +536,7 @@ function getErrors() {
 		type: "GET",
 		url: "data.xml",
 		dataType: "xml",
+		cache: false,
 		success: function(xml) {
 			var error = parseInt($(xml).find('EMERGENCY').text());
 			switch (error) {
@@ -577,6 +560,7 @@ function gameInfo(id, name) {
 		type: "GET",
 		url: url,
 		dataType: "xml",
+		cache: false,
 		success: function(xml) {
 			//If there's no info popup yet, let's make one!
 			if ($('#infoblock').length==0) {
@@ -651,14 +635,13 @@ function noFavLists(id, name) {
 //Fav popup
 function addFavPopup(id, name) {
 	//Get all current list data
-	var cookie = readCookie('FavLists');
+	var savedFavLists = saveData['FavLists'];
 	//If there are no lists made yet, create a popup asking for the first list EVAR
-	if ((cookie == "" || cookie == null) && $('#createFavList').length==0) {
+	if (savedFavLists == null && $('#createFavList').length==0) {
 		noFavLists(id, name);
 		return;
 	}
 	//Otherwise, parse the lists
-	var savedFavLists = JSON.parse(cookie);
 	//Get ALL the list names!
 	var favLists = [];
 	for (var i in savedFavLists) {
@@ -682,14 +665,13 @@ function addFavPopup(id, name) {
 //Universal
 function manageFavPopup(id, name) {
 	//Get all current list data
-	var cookie = readCookie('FavLists');
+	var savedFavLists = saveData['FavLists'];
 	//If there are no lists made yet, create a popup asking for the first list EVAR
-	if ((cookie == "" || cookie == null) && $('#createFavList').length==0) {
+	if (savedFavLists == null && $('#createFavList').length==0) {
 		noFavLists(id, name);
 		return;
 	}
 	//Otherwise, parse the lists
-	var savedFavLists = JSON.parse(cookie);
 	//Get ALL the list names!
 	var favLists = [];
 	for (var i in savedFavLists) {
@@ -748,12 +730,9 @@ function createFavList(id, name) {
 	//Create a new list, currently only possible through the popup, so we always get the value from there
 	var listName = escape($('#favListName')[0].value);
 	//Get the currently saved lists
-	var cookie = readCookie('FavLists');
-	var favLists;
+	var favLists = saveData['FavLists'];
 	//No lists? New object
-	if (cookie == "" || cookie == null) favLists={};
-	//Already have lists? Parse them
-	else favLists = JSON.parse(cookie);
+	if (favLists == null) favLists={};
 	var gameList = [];
 	//An ID is given as argument? Populate list with ID and name
 	if (id) {
@@ -771,14 +750,15 @@ function createFavList(id, name) {
 	//Complicated, I know
 	favLists[listName]=gameList;
 	//Stringify that thing and save it
-	createCookie("FavLists",JSON.stringify(favLists));
+	saveData['FavLists'] = JSON.stringify(favLists);
+	$.post('store.sh', JSON.stringify(saveData));
 }
 
 //Add game to selected list, takes no list argument because we only allow adding from the info screen
 function addFav(id, name) {
 	var listName = $('#favListDropDown')[0].value;
 	//We already have a list, otherwise we wouldn't be able to get here, so no need to check for that
-	var favLists = JSON.parse(readCookie('FavLists'));
+	var favLists = saveData['FavLists'];
 	//Get the gameList array from the favLists object with the listName key
 	var gameList = favLists[listName];
 	//Dummy data present? Slice that thing off
@@ -789,7 +769,8 @@ function addFav(id, name) {
 					"name" : name });
 	//Save again
 	favLists[listName]=gameList;
-	createCookie("FavLists",JSON.stringify(favLists));
+	saveData['FavLists'] = JSON.stringify(favLists);
+	$.post('store.sh', JSON.stringify(saveData));
 	//Remove the last toast upon completion
 	$().toastmessage('removeToast',$('.toast-item:last'))
 }
@@ -800,7 +781,7 @@ function removeFav(id, favList) {
 	//Specify favList
 	if (favList) listName = favList;
 	else listName = $('#favListRemoveDropDown')[0].value;
-	var favLists = JSON.parse(readCookie('FavLists'));
+	var favLists = saveData['FavLists'];
 	//Get the gameList array from the favLists object with the listName key
 	var gameList = favLists[listName];
 	//Find the index in the given array with the given ID
@@ -815,13 +796,14 @@ function removeFav(id, favList) {
 	}
 	//Save
 	favLists[listName]=gameList;
-	createCookie("FavLists",JSON.stringify(favLists));
+	saveData['FavLists'] = JSON.stringify(favLists);
+	$.post('store.sh', JSON.stringify(saveData));
 }
 
 //Function to find FavList by ID
 //I'M A FRIGGIN GENIUS
 function findList(id) {
-	var savedFavLists = JSON.parse(readCookie('FavLists'));
+	var savedFavLists = saveData['FavLists'];
 	var foundLists = [];
 	for (var i in savedFavLists) {
 		if (JSON.stringify(savedFavLists[i]).indexOf(id)!=-1) foundLists.push(i);
@@ -831,9 +813,9 @@ function findList(id) {
 
 //Find the index of a game ID
 //Again, genius :D
-function findIndex(gameList, id) {
-	for (var i=0; i<gameList.length; i++) {
-		if (gameList[i].id==id) return i;
+function findIndex(array, id) {
+	for (var i=0; i<array.length; i++) {
+		if (array[i].id==id) return i;
 	}
 	return -1;
 }
