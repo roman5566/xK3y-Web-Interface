@@ -100,14 +100,12 @@ function getData() {
 				"drives" : drives, 
 				"about" : about 
 			};
-			//Experimental pre-loading of the probably most used menus
-			$.mobile.loadPage('#alpha');
-			$.mobile.loadPage('#chooser');
 			//Serverside storage
 			$.ajax({
 				type: "GET",
 				url: "store.sh",
 				dataType: "json",
+				cache: false,
 				success: function(response) {
 					if (response == null || response == "") {
 						saveData={};
@@ -115,6 +113,9 @@ function getData() {
 					else {
 						saveData=response;
 					}
+					//Experimental pre-loading of the probably most used menus
+					$.mobile.loadPage('#alpha');
+					$.mobile.loadPage('#chooser');
 				}
 			});
 		}
@@ -154,6 +155,7 @@ function getFolderStructure() {
 	var cover;
 	var chk;
 	var stored;
+	var dataChange=false;
 	var timesPlayed;
 	//Create directories first
 	for (var i=0; i<data.dirs.length; i++) {
@@ -176,11 +178,12 @@ function getFolderStructure() {
 		par = escape(data.ISOlist[i].par);
 		cover = data.ISOlist[i].image;
 		chk = data.drives.toString().indexOf(par);
-		stored = null;
+		stored = saveData[id];
 		//Cookie info, will be replaces with server stored info later on
 		if (stored == null) {
-			createCookie(id, '{"timesPlayed": 0, "lastPlayed": 0}');
+			saveData[id] = {"timesPlayed": 0, "lastPlayed": 0};
 			timesPlayed = 0;
+			dataChange=true;
 		}
 		else timesPlayed = stored.timesPlayed;
 		//Same parent fix as with directories
@@ -198,6 +201,10 @@ function getFolderStructure() {
 	});
 	//Magic!
 	$('#contentlist').listview();
+	
+	if (dataChange) {
+		$.post('store.sh',JSON.stringify(saveData));
+	}
 }
 
 //Create the About screen
@@ -235,6 +242,7 @@ function getList() {
 	var cover;
 	var letter;
 	var stored;
+	var dataChange=false;
 	var timesPlayed;
 	var HTML='';
 	//Add all the games to the list
@@ -243,11 +251,12 @@ function getList() {
 		id = ISOlist[i].id;
 		cover = ISOlist[i].image;
 		letter = iso.charAt(0).toUpperCase();
-		stored = JSON.parse(readCookie(id));
+		stored = saveData[id];
 		timesPlayed;
 		if (stored == null) {
-			createCookie(id, '{"timesPlayed": 0, "lastPlayed": 0}');
+			saveData[id] = {"timesPlayed": 0, "lastPlayed": 0};
 			timesPlayed = 0;
+			dataChange=true;
 		}
 		else timesPlayed = stored.timesPlayed;
 		if (HTML.indexOf(letter+'-divider')==-1) {
@@ -261,6 +270,10 @@ function getList() {
 	document.getElementById('isolist').innerHTML=HTML;
 	//Magic!
 	$("#isolist").listview();
+	
+	if (dataChange) {
+		$.post('store.sh',JSON.stringify(saveData));
+	}
 }
 
 //Create the Most Played list
@@ -277,9 +290,9 @@ function getMostPlayed() {
 	//$('<li data-role="list-divider">').html('<h3>Most Played</h3>').appendTo("#speclist");
 	//Sort it with how many times it's been selected (to be replaced with server stored info later)
 	ISOlist.sort(function(x,y) { 
-		var JSONx = JSON.parse(readCookie(x.id));
+		var JSONx = saveData[x.id];
 		var timesPlayedx = JSONx.timesPlayed;
-		var JSONy = JSON.parse(readCookie(y.id));
+		var JSONy = saveData[y.id];
 		var timesPlayedy = JSONy.timesPlayed;
 		return timesPlayedy - timesPlayedx;
 	});
@@ -289,6 +302,7 @@ function getMostPlayed() {
 	var id;
 	var covers;
 	var stored;
+	var dataChange=false;
 	var timesPlayed;
 	var HTML='<li data-role="list-divider"><h3>Most Played</h3></li>';
 	//Add all the games to the list
@@ -296,10 +310,11 @@ function getMostPlayed() {
 		iso = ISOlist[i].name;
 		id = ISOlist[i].id;
 		cover = ISOlist[i].image;
-		stored = JSON.parse(readCookie(id));
+		stored = saveData[id];
 		timesPlayed = stored.timesPlayed;
 		if (timesPlayed == null || timesPlayed==0) {
-			createCookie(id, '{"timesPlayed": 0, "lastPlayed": 0}');
+			saveData[id] = {"timesPlayed": 0, "lastPlayed": 0};
+			dataChange=true;
 			//Never played D: Get the hell out!
 			break;
 		}
@@ -314,7 +329,11 @@ function getMostPlayed() {
 	$("#speclist").listview();
 	//IE makes the bar disappear sometimes, remove and add it back!
 	$('#IEFix').removeClass('ui-header ui-bar-a');
-	$('#IEFix').addClass('ui-header ui-bar-a');	
+	$('#IEFix').addClass('ui-header ui-bar-a');
+	
+	if (dataChange) {
+		$.post('store.sh',JSON.stringify(saveData));
+	}
 }
 
 //Create the Recent list
@@ -329,9 +348,9 @@ function getRecent() {
 	//$('<li data-role="list-divider">').html('<h3>Recently Played</h3>').appendTo("#speclist");
 	//Sort it, will be replaced with server stored info later
 	ISOlist.sort(function(x,y) { 
-		var JSONx = JSON.parse(readCookie(x.id));
+		var JSONx = saveData[x.id];
 		var lastPlayedx = JSONx.lastPlayed;
-		var JSONy = JSON.parse(readCookie(y.id));
+		var JSONy = saveData[y.id];
 		var lastPlayedy = JSONy.lastPlayed;
 		return lastPlayedy - lastPlayedx;
 	});
@@ -342,15 +361,17 @@ function getRecent() {
 	var cover;
 	var stored;
 	var lastPlayed;
+	var dataChange=false;
 	var HTML='<li data-role="list-divider"><h3>Recently Played</h3></li>';
 	for (var i=0;i<ISOlist.length;i++) {
 		iso = ISOlist[i].name;
 		id = ISOlist[i].id;
 		cover = ISOlist[i].image;
-		stored = JSON.parse(readCookie(id));
+		stored = saveData[id];
 		lastPlayed = stored.lastPlayed;
 		if (lastPlayed == null || lastPlayed==0) {
-			createCookie(id, '{"timesPlayed": 0, "lastPlayed": 0}');
+			saveData[id] = {"timesPlayed": 0, "lastPlayed": 0};
+			dataChange=true;
 			//Never played D: Get the hell out!
 			break;
 		}
@@ -368,6 +389,10 @@ function getRecent() {
 	//IE makes the bar disappear sometimes, remove and add it back!
 	$('#IEFix').removeClass('ui-header ui-bar-a');
 	$('#IEFix').addClass('ui-header ui-bar-a');
+	//If saveData changed, store to server
+	if (dataChange) {
+		$.post('store.sh',JSON.stringify(saveData));
+	}
 }
 
 //Create the fav lists tab
@@ -403,9 +428,10 @@ function prepGame(id, name) {
 		if (CoverSlide.isFullscreen()) CoverSlide.exitFullscreen();
 	}
 	//Update the cookies, soon to be server side storage
-	var stored = JSON.parse(readCookie(id));
+	var stored = saveData[id];
 	var timesPlayed = stored.timesPlayed;
-	createCookie(id, '{"timesPlayed":' + (timesPlayed+1) +', "lastPlayed":' + Date.parse(new Date) + '}');
+	saveData[id] = {"timesPlayed": (timesPlayed+1), "lastPlayed": Date.parse(new Date)};
+	$.post('store.sh',JSON.stringify(saveData));
 	//Update the playtimes on the menu's
 	updatePlayTimes(id);
 	//launchGame(id);
@@ -469,7 +495,7 @@ function updatePlayTimes(id) {
 	//Specificly update a game
 	if (id) {
 		var data = $('span#'+id);
-		var stored = JSON.parse(readCookie(id));
+		var stored = saveData[id];
 		var current = stored.timesPlayed;
 		for (var i = 0; i<data.length; i++) {
 			data[i].innerHTML = current + (current == 1 ? " time" : " times");
