@@ -117,9 +117,9 @@ function getData() {
 					//Experimental pre-loading of the probably most used menus
 					$.mobile.loadPage('#alpha');
 					$.mobile.loadPage('#chooser');
-				}
+				},
 				error: function() {
-					
+					$().toastmessage('showErrorToast', 'Error loading server storage, old firmware?');
 				}
 			});
 		}
@@ -803,7 +803,7 @@ function removeFav(id, favList) {
 //Function to find FavList by ID
 //I'M A FRIGGIN GENIUS
 function findList(id) {
-	var savedFavLists = saveData['FavLists']);
+	var savedFavLists = saveData['FavLists'];
 	var foundLists = [];
 	for (var i in savedFavLists) {
 		if (JSON.stringify(savedFavLists[i]).indexOf(id)!=-1) foundLists.push(i);
