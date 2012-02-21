@@ -6,7 +6,7 @@ $(document).delegate(document, "pagebeforechange", function( e, data ) {
 //Add fitted logos to all pages
 $(document).ready(function() {
 	$('[data-role="page"]').each(function() {$(this).prepend('<img class="logo" src="img/logo.png" style="max-width:'+$(window).width()+"px"+';">')});
-	$('center').append('<div data-role="page" id="popup" data-theme="a" data-title="Popup"><img class="logo" src="img/logo.png" style="max-width:'+$(window).width()+"px"+';"></div>');
+	//$('center').append('<div data-role="page" id="popup" data-theme="a" data-title="Popup"><img class="logo" src="img/logo.png" style="max-width:'+$(window).width()+"px"+';"></div>');
 });
 
 //Event to create Cover Slide
@@ -79,7 +79,7 @@ function getData() {
 						"title" : "FullScreen", 
 						"par" : par };
 				ISOlist.push(isodata);
-				//Cache images, untested
+				//Cache images
 				cacheImage = new Image();
 				cacheImage.src = "covers/"+id+".jpg";
 				cache.push(cacheImage);
@@ -114,14 +114,20 @@ function getData() {
 					else {
 						saveData=response;
 					}
-					//Experimental pre-loading of the probably most used menus
-					$.mobile.loadPage('#alpha');
-					$.mobile.loadPage('#chooser');
 				},
 				error: function() {
-					$().toastmessage('showErrorToast', 'Error loading server storage, old firmware?');
+					$().toastmessage('showToast', {
+						text: 'Error loading server storage, old firmware?',
+						type: "error",
+						close: function(){}
+					});
+					$('.toast-container').css('margin-left','-'+$('.toast-container').width()/2+'px');
+					saveData={};
 				}
 			});
+			//Experimental pre-loading of the probably most used menus
+			$.mobile.loadPage('#alpha');
+			$.mobile.loadPage('#chooser');
 		}
 	});
 }
