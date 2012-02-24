@@ -1,3 +1,11 @@
+/** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **/
+/** ** ** ** ** ** ** Init  ** ** ** ** ** ** ** **/
+/** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **/
+
+/* * * * * * * * * * * * * * * * * * * */
+/* * * Events, fixes, global stuff * * */
+/* * * * * * * * * * * * * * * * * * * */
+
 //Remove all toasts on pagechange event
 $(document).delegate(document, "pagebeforechange", function( e, data ) {
 	//if ($('.toast-container').length!=0) $('#popup').dialog('close');
@@ -16,7 +24,7 @@ $(document).delegate('#slide', 'pagecreate',function(event) {
 
 //Event to create Folder Structure
 $(document).delegate('#chooser', 'pagecreate',function(event) {
-	getFolderStructure();
+	makeFolderStructure();
 });
 
 //Some fixes for nested folders in Folder Structure
@@ -28,18 +36,21 @@ $(document).delegate(':jqmData(url^=chooser)', 'pagebeforecreate', function(even
 
 //Event to create About
 $(document).delegate('#about', 'pagecreate',function(event) {
-	getAbout();
+	makeAbout();
 });
 
 //Event to create Game List
 $(document).delegate('#alpha', 'pagecreate',function(event) {
-	getList();
+	makeListTab();
 });
+
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * * Data parsing  * * * * * * */
+/* * * * * * * * * * * * * * * * * * * */
 
 //Some global variables needed
 var data;
 var saveData;
-var scrollPosition;
 
 //Main function, grabs all data from xk3y and parses it
 function getData() {
@@ -109,28 +120,43 @@ function getData() {
 				cache: false,
 				success: function(response) {
 					if (response == null || response == "") {
+						//Nothing saved yet? Make a new empty object
 						saveData={};
 					}
 					else {
+						//Else use the saved stats
 						saveData=response;
 					}
+					//Experimental pre-loading of the probably most used menus
+					$.mobile.loadPage('#alpha');
+					$.mobile.loadPage('#chooser');
 				},
 				error: function() {
+					//Error? Probably old firmware, show error popup
 					$().toastmessage('showToast', {
 						text: 'Error loading server storage, old firmware?',
 						type: "error",
 						close: function(){}
 					});
 					$('.toast-container').css('margin-left','-'+$('.toast-container').width()/2+'px');
+					//Still make a new empty object, so we can still use it this session
 					saveData={};
+					//Experimental pre-loading of the probably most used menus
+					$.mobile.loadPage('#alpha');
+					$.mobile.loadPage('#chooser');
 				}
 			});
-			//Experimental pre-loading of the probably most used menus
-			$.mobile.loadPage('#alpha');
-			$.mobile.loadPage('#chooser');
 		}
 	});
 }
+
+/** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **/
+/** ** ** ** ** ** Menus Creation ** ** ** ** ** **/
+/** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **/
+
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * * * Cover Slide * * * * * * */
+/* * * * * * * * * * * * * * * * * * * */
 
 //Make the Cover Slide
 function makeSlide() {
@@ -152,8 +178,12 @@ function makeSlide() {
 	});
 }
 
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * Folder Structure  * * * * * */
+/* * * * * * * * * * * * * * * * * * * */
+
 //Create the folder Structure
-function getFolderStructure() {
+function makeFolderStructure() {
 	$("#content").html("");
 	$('<ul id="contentlist" data-role="listview" data-inset="true">').appendTo("#content");
 	var dir;
@@ -217,24 +247,12 @@ function getFolderStructure() {
 	}
 }
 
-//Create the About screen
-function getAbout() {
-	//Current Web Interface version, update it!
-	var version = "1.08";
-	//Long HTML ftw
-	$("#info").html('<ul data-role="listview" data-inset="true"><li>Web Interface version '+version+'</li><li>Interface created using jQuery Mobile</li><li>Cover Slide created using Galleria</li><li>Interface made by Mr_Waffle</li></ul><a id="resetStatsButton" href="#" onclick="resetStats()" data-inline="true" data-role="button">Reset Game Stats</a>');
-	$('<ul id="infolist" data-role="listview" data-inset="true">').prependTo("#info");
-	//All the info items from the xK3y
-	for (var i=0; i<data.about.length; i++) {
-		$('<li>').html(data.about[i].item+' : '+data.about[i].value).appendTo("#infolist");
-	}
-	$('<li>').html('Connected Devices : '+data.drives).appendTo("#infolist");
-	//Magic!
-	$('#infolist').listview();
-}
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * * * Game List * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * */
 
 //Make the Alphabetic Game List
-function getList() {
+function makeListTab() {
 	//Copy the ISOList! We don't want to mess up the other menus
 	var ISOlist = data.ISOlist.slice();
 	//Make it alpabetically listed
@@ -286,14 +304,18 @@ function getList() {
 	}
 }
 
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * * * Most Played * * * * * * */
+/* * * * * * * * * * * * * * * * * * * */
+
 //Create the Most Played list
-function getMostPlayed() {
+function makeMostPlayedTab() {
 	//We can't know from what tab we came, so we always pause the EasyDate plugin
 	$.easydate.pause();
 	//Copy the ISOList! We don't want to mess up the other menus
 	var ISOlist = data.ISOlist.slice();
 	//To speed switching between tabs up, we hide the alphabetic list and show a short "special" list
-	//Because the special lists can change in one use, we always refresh those, but only load the alphabetic list once
+	//Because the special lists can change in one use, we always recreate those, but only load the alphabetic list once
 	$('#speclister').show();
 	$('#lister').hide();
 	$("#speclister").html('<ul id="speclist" data-role="listview" data-filter="true" data-inset="true"></ul>');
@@ -346,12 +368,16 @@ function getMostPlayed() {
 	}
 }
 
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * * Recent Played * * * * * * */
+/* * * * * * * * * * * * * * * * * * * */
+
 //Create the Recent list
-function getRecent() {
+function makeRecentTab() {
 	//Copy the ISOList! We don't want to mess up the other menus
 	var ISOlist = data.ISOlist.slice();
 	//To speed switching between tabs up, we hide the alphabetic list and show a short "special" list
-	//Because the special lists can change in one use, we always refresh those, but only load the alphabetic list once
+	//Because the special lists can change in one use, we always recreate those, but only load the alphabetic list once
 	$('#speclister').show();
 	$('#lister').hide();
 	$("#speclister").html('<ul id="speclist" data-role="listview" data-filter="true" data-inset="true"></ul>');
@@ -405,163 +431,40 @@ function getRecent() {
 	}
 }
 
-//Create the fav lists tab
-function getFavLists() {
-	//Copy the ISOList! We don't want to mess up the other menus
-	var ISOlist = data.ISOlist.slice();
-	//To speed switching between tabs up, we hide the alphabetic list and show a short "special" list
-	//Because the special lists can change in one use, we always refresh those, but only load the alphabetic list once
-	$('#speclister').show();
-	$('#lister').hide();
-	$("#speclister").html('<ul id="speclist" data-role="listview" data-filter="true" data-inset="true"></ul>');
-	$('<li data-role="list-divider">').html('<h3>Favorites</h3>').appendTo("#speclist");
-	$('<li>').html('<h3><label for="favListSelector">Select a list!</label></h3><select name="favListDropDown" id="favListDropDown" data-theme="a" data-icon="arrow-d" data-inline="true"><option value="test">test</option></select><p></p>').appendTo("#speclist");
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * About * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * */
+
+//Create the About screen
+function makeAbout() {
+	//Current Web Interface version, update it!
+	var version = "1.09";
+	//Long HTML ftw
+	$("#info").html('<ul data-role="listview" data-inset="true"><li>Web Interface version '+version+'</li><li>Interface created using jQuery Mobile</li><li>Cover Slide created using Galleria</li><li>Interface made by Mr_Waffle</li></ul><a id="resetStatsButton" href="#" onclick="resetStats()" data-inline="true" data-role="button">Reset Game Stats</a>');
+	$('<ul id="infolist" data-role="listview" data-inset="true">').prependTo("#info");
+	//All the info items from the xK3y
+	for (var i=0; i<data.about.length; i++) {
+		$('<li>').html(data.about[i].item+' : '+data.about[i].value).appendTo("#infolist");
+	}
+	$('<li>').html('Connected Devices : '+data.drives).appendTo("#infolist");
 	//Magic!
-	$("#speclist").listview();
-	$("#speclister").trigger('create');
-	//IE makes the bar disappear sometimes, remove and add it back!
-	$('#IEFix').removeClass('ui-header ui-bar-a');
-	$('#IEFix').addClass('ui-header ui-bar-a');
+	$('#infolist').listview();
 }
 
-//Game chosen? Sweet! We need to do some stuff first though...
-function prepGame(id, name) {
-	//Delete any toasts there are right now
-	//if ($('.toast-container')) $().toastmessage('removeToast',$('.toast-item'));
-	//Show the game info from appropriate XML file
-	//Huge design issue right now when on smaller screens, someone a suggestion?
-	gameInfo(id, name);
-	//There's a bug with the iPad if we're fullscreen in Cover Slide, kick it out.
-	//I don't know if there're other devices that have it, so we just always kick it out
-	var CoverSlide = Galleria.get(0);
-	if (CoverSlide) {
-		if (CoverSlide.isFullscreen()) CoverSlide.exitFullscreen();
-	}
-	//Update the cookies, soon to be server side storage
-	var stored = saveData[id];
-	var timesPlayed = stored.timesPlayed;
-	saveData[id] = {"timesPlayed": (timesPlayed+1), "lastPlayed": Date.parse(new Date)};
-	$.post('store.sh',JSON.stringify(saveData));
-	//Update the playtimes on the menu's
-	updatePlayTimes(id);
-	//launchGame(id);
-}
+/** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **/
+/** ** ** ** ** ** Game Selection ** ** ** ** ** **/
+/** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **/
 
-//Actually loads the game
-function launchGame(id) {
-   var url = "launchgame.sh?"+id;
-   $.ajax({
-		type: "GET",
-		url: "data.xml",
-		dataType: "xml",
-		cache: false,
-		success: function(xml) {
-			var tray = $(xml).find('TRAYSTATE').text();
-			var guistate = $(xml).find("GUISTATE").text();
-			if (tray == 0) {
-                $.get(url);
-            } else {
-                if (tray == 1 && guistate == 1) {
-                    $().toastmessage('showNoticeToast', 'Please open your DVD tray.');
-					$('html,body').animate({scrollTop: document.body.scrollHeight}, 1000);
-					$.get(url);
-                } else {
-                    if (tray == 1 && guistate == 2) {
-                        $().toastmessage('showNoticeToast', 'A game appears to be already loaded, please open your DVD tray and click "Play Game" again.');
-						$('html,body').animate({scrollTop: document.body.scrollHeight}, 1000);
-                    }
-                }
-			}
-		}
-	});
-   //Experimental error system, still needs work
-   //var t=setTimeout("getErrors()", 3000);
-}
-
-//Update the menu play times
-function updatePlayTimes(id) {
-	//Specificly update a game
-	if (id) {
-		var data = $('span#'+id);
-		var stored = saveData[id];
-		var current = stored.timesPlayed;
-		for (var i = 0; i<data.length; i++) {
-			data[i].innerHTML = current + (current == 1 ? " time" : " times");
-		}
-	}
-	//No ID specified? Clear all the games
-	else {
-		var data = $('.timesPlayed');
-		for (var i = 0; i<data.length; i++) {
-			data[i].innerHTML = "0 times";
-		}
-	}
-}
-
-//Reset stats from the About menu
-function resetStats() {
-	for (var i = 0; i<data.ISOlist.length; i++) {
-		createCookie(data.ISOlist[i].id, '{"timesPlayed": 0, "lastPlayed": 0}');
-	}
-	$('#resetStatsButton>span>span').html("Done!");
-	var resetText = setTimeout("$('#resetStatsButton>span>span').html('Reset Game Stats')","3000");
-	//Update the visual playtimes
-	updatePlayTimes();
-}
-
-//Experimental update from the web, currently only checks for updates, never actually called
-function getLatest() {
-	if ($.browser.msie) {
-	var xdr = new XDomainRequest();
-	xdr.onload = function() {
-					var current = data.about[1].value;
-					var latest = xdr.responseText;
-					if (current < latest) $().toastmessage('showNoticeToast', 'A new firmware is available for download: '+latest);
-					$('.toast-container').css('margin-left','-'+$('.toast-container').width()/2+'px');
-				}
-	xdr.open("get", 'http://devfaw.com/latest.php');
-	xdr.send();
-	}
-	else {
-		$.ajax({
-			type: "GET",
-			url: "http://devfaw.com/latest.php",
-			cache: false,
-			success: function(latest) {
-				var current = data.about[1].value;
-				if (current < latest) $().toastmessage('showNoticeToast', 'A new firmware is available for download: '+latest);
-				$('.toast-container').css('margin-left','-'+$('.toast-container').width()/2+'px');
-			}
-		});
-	}
-}
-
-//The error system from earlier, needs work
-function getErrors() {
-	$.ajax({
-		type: "GET",
-		url: "data.xml",
-		dataType: "xml",
-		cache: false,
-		success: function(xml) {
-			var error = parseInt($(xml).find('EMERGENCY').text());
-			switch (error) {
-				case 2:
-					$().toastmessage('showErrorToast', 'Disc Read Error, reset your console!');
-					break;
-				default:
-					break;
-			}
-		}
-	});
-}
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * * * Game Info * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * */
 
 //The new game info system/design, still needs moar work
 //Messy as hell
 function gameInfo(id, name) {
 	var url = 'covers/'+id+'.xml';
 	//Haxxed dialog
-	$('<a href="#popup" data-rel="dialog">').appendTo('body').click().remove();
+	showBackground();
 	$.ajax({
 		type: "GET",
 		url: url,
@@ -630,13 +533,160 @@ function gameInfo(id, name) {
 	});
 }
 
-//Predefined function to make following functions a bit easier to look at
-function noFavLists(id, name) {
-	$().toastmessage('showErrorToast', '<div id="createFavList">No favourite lists found! Please create one.<br/><center><input id="favListName" style="width:40%" value="List Name" type="text"/></center><a onclick="createFavList(\''+id+'\',\''+name+'\')" href="#" data-role="button" data-inline="true">Create List</a></div>');
-	//JQM magic
-	$('#createFavList').trigger('create');
-	//We're done here
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * * Prepare Games * * * * * * */
+/* * * * * * * * * * * * * * * * * * * */
+
+//Game chosen? Sweet! We need to do some stuff first though...
+function prepGame(id, name) {
+	//Delete any toasts there are right now
+	//if ($('.toast-container')) $().toastmessage('removeToast',$('.toast-item'));
+	//Show the game info from appropriate XML file
+	gameInfo(id, name);
+	//There's a bug with the iPad if we're fullscreen in Cover Slide, kick it out.
+	//I don't know if there're other devices that have it, so we just always kick it out
+	var CoverSlide = Galleria.get(0);
+	if (CoverSlide) {
+		if (CoverSlide.isFullscreen()) CoverSlide.exitFullscreen();
+	}
+	//Update the cookies, soon to be server side storage
+	var stored = saveData[id];
+	var timesPlayed = stored.timesPlayed;
+	saveData[id] = {"timesPlayed": (timesPlayed+1), "lastPlayed": Date.parse(new Date)};
+	$.post('store.sh',JSON.stringify(saveData));
+	//Update the playtimes on the menu's
+	updatePlayTimes(id);
+	//launchGame(id);
 }
+
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * * * Launch Game * * * * * * */
+/* * * * * * * * * * * * * * * * * * * */
+
+//Actually loads the game
+function launchGame(id) {
+   var url = "launchgame.sh?"+id;
+   $.ajax({
+		type: "GET",
+		url: "data.xml",
+		dataType: "xml",
+		cache: false,
+		success: function(xml) {
+			var tray = $(xml).find('TRAYSTATE').text();
+			var guistate = $(xml).find("GUISTATE").text();
+			if (tray == 0) {
+                $.get(url);
+            } else {
+                if (tray == 1 && guistate == 1) {
+                    $().toastmessage('showNoticeToast', 'Please open your DVD tray.');
+					$('html,body').animate({scrollTop: document.body.scrollHeight}, 1000);
+					$.get(url);
+                } else {
+                    if (tray == 1 && guistate == 2) {
+                        $().toastmessage('showNoticeToast', 'A game appears to be already loaded, please open your DVD tray and click "Play Game" again.');
+						$('html,body').animate({scrollTop: document.body.scrollHeight}, 1000);
+                    }
+                }
+			}
+		}
+	});
+   //Experimental error system, still needs work
+   //var t=setTimeout("getErrors()", 3000);
+}
+
+/** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **/
+/** ** ** ** ** FavList functions ** ** ** ** ** **/
+/** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **/
+
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * * Favorites Tab * * * * * * */
+/* * * * * * * * * * * * * * * * * * * */
+
+//Create the fav lists tab
+function makeFavListsTab() {
+	//Copy the ISOList! We don't want to mess up the other menus
+	var ISOlist = data.ISOlist.slice();
+	//To speed switching between tabs up, we hide the alphabetic list and show a short "special" list
+	//Because the special lists can change in one use, we always recreate those, but only load the alphabetic list once
+	$('#speclister').show();
+	$('#lister').hide();
+	$("#speclister").html('<ul id="speclist" data-role="listview" data-inset="true"></ul>');
+	$('<li data-role="list-divider">').html('<h3>Favorites</h3>').appendTo("#speclist");
+	var savedFavLists = saveData['FavLists'];
+	var tabHTML='';
+	if (savedFavLists == null) {
+		$('<li>').html('<h3>No favorite lists found! Click Management to create one!</h3>').appendTo('#speclist');
+		tabHTML='<a onclick="manageFavPopup();showBackground()" href="#" data-role="button" data-icon="gear">Management</a>'
+	}
+	else {
+		if (typeof(savedFavLists)!='object') savedFavLists=JSON.parse(savedFavLists);
+		var favLists = [];
+		for (var i in savedFavLists) {
+			favLists.push(i);
+		}
+		var favListsHTML='';
+		for (var i=0;i<favLists.length;i++) {
+			favListsHTML+='<option value="'+favLists[i]+'">'+unescape(favLists[i])+'</option>';
+		}
+		tabHTML='<label for="favListSelector">Select a list!</label></h3><select name="favListDropDown" id="favListDropDown" data-theme="a" data-icon="arrow-d" onchange="getFavList(this.value)">'+favListsHTML+'</select><a onclick="manageFavPopup();showBackground()" href="#" data-role="button" data-icon="gear">Management</a>';
+		getFavList(favLists[1]);
+	}
+	$('<div id="favTabOptions" class="ui-hide-label">').html(tabHTML).prependTo("#speclister");
+	//Magic!
+	$("#speclist").listview();
+	$("#speclister").trigger('create');
+	//IE makes the bar disappear sometimes, remove and add it back!
+	$('#IEFix').removeClass('ui-header ui-bar-a');
+	$('#IEFix').addClass('ui-header ui-bar-a');
+}
+
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * List favlist games  * * * * */
+/* * * * * * * * * * * * * * * * * * * */
+
+function getFavList(listName) {
+	var savedFavLists = saveData['FavLists'];
+	if (typeof(savedFavLists)!='object') savedFavLists=JSON.parse(savedFavLists);
+	var games = savedFavLists[listName];
+	console.log(games);
+	var iso;
+	var id;
+	var cover;
+	var stored;
+	var dataChange=false;
+	var timesPlayed;
+	var HTML='<li data-role="list-divider"><h3>Favorites</h3></li>';
+	for (var i=0;i<=games.length;i++) {
+		iso = games[i].name;
+		id = games[i].id;
+		//if (id=='0000000000000000000000000000000000000000') continue;
+		cover = 'covers/'+games[i].id+'.jpg';
+		stored = saveData[games[i].id];
+		timesPlayed;
+		if (stored == null) {
+			saveData[id] = {"timesPlayed": 0, "lastPlayed": 0};
+			timesPlayed = 0;
+			dataChange=true;
+		}
+		else timesPlayed = stored.timesPlayed;
+		HTML+='<li id="'+iso+'"><a href="#" onclick="prepGame(\''+id+'\',\''+escape(iso)+'\')"><img id="cover" src="'+cover+'"/><h3>'+iso+'</h3><p>Played <span class="timesPlayed" id="'+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a>';
+	}
+	//Native approach should be faster
+	document.getElementById('speclist').innerHTML=HTML;
+	if ($('#speclist>li').length == 1) $('<li>').html('<h3>This favorite list is empty!</h3><p></p>').appendTo("#speclist");	
+	//Magic!
+	$("#speclist").listview();
+	$("#speclister").trigger('create');
+	
+	if (dataChange) {
+		$.post('store.sh',JSON.stringify(saveData));
+	}
+	
+}
+
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * * Add Fav Popup * * * * * * */
+/* * * * * * * * * * * * * * * * * * * */
 
 //Fav popup
 function addFavPopup(id, name) {
@@ -647,6 +697,7 @@ function addFavPopup(id, name) {
 		noFavLists(id, name);
 		return;
 	}
+	if (typeof(savedFavLists)!='object') savedFavLists=JSON.parse(savedFavLists);
 	//Otherwise, parse the lists
 	//Get ALL the list names!
 	var favLists = [];
@@ -667,16 +718,23 @@ function addFavPopup(id, name) {
 	else return;
 }
 
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * Manage Favs Popup * * * * * */
+/* * * * * * * * * * * * * * * * * * * */
+
 //Management popup
 //Universal
 function manageFavPopup(id, name) {
+	$('.toast-container').css('top',$('.logo')[0].height+'px');
 	//Get all current list data
 	var savedFavLists = saveData['FavLists'];
 	//If there are no lists made yet, create a popup asking for the first list EVAR
 	if (savedFavLists == null && $('#createFavList').length==0) {
-		noFavLists(id, name);
+		if (id) noFavLists(id, name);
+		else noFavLists(null, null, true);
 		return;
 	}
+	if (typeof(savedFavLists)!='object') savedFavLists=JSON.parse(savedFavLists);
 	//Otherwise, parse the lists
 	//Get ALL the list names!
 	var favLists = [];
@@ -697,8 +755,10 @@ function manageFavPopup(id, name) {
 	}
 	//Preparing popup HTML
 	var managementHTML = '<div class="favListManagementToast">';
+	var createList='createFavList()';
 	//Add from info HTML
 	if (id) {
+		createList='createFavList(\''+id+','+name+'\')';
 		//Remove from list HTML
 		var removeListsHTML="";
 		var removeLists = findList(id);
@@ -715,13 +775,13 @@ function manageFavPopup(id, name) {
 	}
 	//Some general HTML here
 	//New list HTML
-	managementHTML+='<label for="favListName">Create a new list:</label><center><input id="favListName" style="max-width:200px" value="List Name" type="text"/></center><a onclick="createFavList(\''+id+'\',\''+name+'\')" href="#" data-role="button" data-inline="true">Create List</a><hr/>';
+	managementHTML+='<label for="favListName">Create a new list:</label><center><input id="favListName" style="max-width:200px" value="List Name" type="text"/></center><a onclick="'+createList+'" href="#" data-role="button" data-inline="true">Create List</a><hr/>';
 	//Close button
 	if (id) {
 		managementHTML+='<a onclick="$().toastmessage(\'removeToast\',$(\'.toast-item:last\'))" href="#" data-role="button" data-inline="true">Close</a>';
 	}
 	else {
-		managementHTML+='<a onclick="$(\'#popup\').dialog(\'close\');$().toastmessage(\'removeToast\',$(\'.toast-item\')))" href="#" data-role="button" data-inline="true">Close</a>';
+		managementHTML+='<a onclick="$(\'#popup\').dialog(\'close\');$().toastmessage(\'removeToast\',$(\'.toast-item\'))" href="#" data-role="button" data-inline="true">Close</a>';
 	}
 	//End this madness
 	managementHTML+='</div>';
@@ -731,6 +791,10 @@ function manageFavPopup(id, name) {
 	$('.favListManagementToast').trigger('create');
 }
 
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * * Create Fav List * * * * * */
+/* * * * * * * * * * * * * * * * * * * */
+
 //Create a new list, optional id and name argument to populate list on creation
 function createFavList(id, name) {
 	//Create a new list, currently only possible through the popup, so we always get the value from there
@@ -739,6 +803,7 @@ function createFavList(id, name) {
 	var favLists = saveData['FavLists'];
 	//No lists? New object
 	if (favLists == null) favLists={};
+	if (typeof(favLists)!='object') favLists=JSON.parse(favLists);
 	var gameList = [];
 	//An ID is given as argument? Populate list with ID and name
 	if (id) {
@@ -759,6 +824,10 @@ function createFavList(id, name) {
 	saveData['FavLists'] = JSON.stringify(favLists);
 	$.post('store.sh', JSON.stringify(saveData));
 }
+
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * Add game to favlist * * * * */
+/* * * * * * * * * * * * * * * * * * * */
 
 //Add game to selected list, takes no list argument because we only allow adding from the info screen
 function addFav(id, name) {
@@ -781,6 +850,10 @@ function addFav(id, name) {
 	$().toastmessage('removeToast',$('.toast-item:last'))
 }
 
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * Remove game from list * * * * */
+/* * * * * * * * * * * * * * * * * * * */
+
 //Remove a game from a list from either a dropdown menu or argument
 function removeFav(id, favList) {
 	var listName;
@@ -788,6 +861,7 @@ function removeFav(id, favList) {
 	if (favList) listName = favList;
 	else listName = $('#favListRemoveDropDown')[0].value;
 	var favLists = saveData['FavLists'];
+	if (typeof(favLists)!='object') favLists=JSON.parse(favLists);
 	//Get the gameList array from the favLists object with the listName key
 	var gameList = favLists[listName];
 	//Find the index in the given array with the given ID
@@ -806,6 +880,71 @@ function removeFav(id, favList) {
 	$.post('store.sh', JSON.stringify(saveData));
 }
 
+/** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **/
+/** ** ** ** ** ** ** Other ** ** ** ** ** ** ** **/
+/** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **/
+
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * Update visual playtimes * * * */
+/* * * * * * * * * * * * * * * * * * * */
+
+//Update the menu play times
+function updatePlayTimes(id) {
+	//Specificly update a game
+	if (id) {
+		var data = $('span#'+id);
+		var stored = saveData[id];
+		var current = stored.timesPlayed;
+		for (var i = 0; i<data.length; i++) {
+			data[i].innerHTML = current + (current == 1 ? " time" : " times");
+		}
+	}
+	//No ID specified? Clear all the games
+	else {
+		var data = $('.timesPlayed');
+		for (var i = 0; i<data.length; i++) {
+			data[i].innerHTML = "0 times";
+		}
+	}
+}
+
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * * * Reset Stats * * * * * * */
+/* * * * * * * * * * * * * * * * * * * */
+
+//Reset stats from the About menu
+function resetStats() {
+	for (var i = 0; i<data.ISOlist.length; i++) {
+		createCookie(data.ISOlist[i].id, '{"timesPlayed": 0, "lastPlayed": 0}');
+	}
+	$('#resetStatsButton>span>span').html("Done!");
+	var resetText = setTimeout("$('#resetStatsButton>span>span').html('Reset Game Stats')","3000");
+	//Update the visual playtimes
+	updatePlayTimes();
+}
+
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * * * No Fav List * * * * * * */
+/* * * * * * * * * * * * * * * * * * * */
+
+//Predefined No Fav Lists message
+function noFavLists(id, name, tabbed) {
+	$('.toast-container').css('top',$('.logo')[0].height+'px');
+	onClick='';
+	if (tabbed) {
+		onClick='createFavList();$().toastmessage(\'removeToast\',$(\'.toast-item:last\'))';
+	}
+	else onClick='createFavList(\''+id+'\',\''+name+'\')';
+	$().toastmessage('showErrorToast', '<div id="createFavList">No favourite lists found! Please create one.<br/><center><input id="favListName" style="width:40%" value="List Name" type="text"/></center><a onclick="'+onClick+'" href="#" data-role="button" data-inline="true">Create List</a></div>');
+	//JQM magic
+	$('#createFavList').trigger('create');
+	//We're done here
+}
+
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * * * Find List * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * */
+
 //Function to find FavList by ID
 //I'M A FRIGGIN GENIUS
 function findList(id) {
@@ -817,6 +956,10 @@ function findList(id) {
 	return foundLists;
 }
 
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * * Find list index * * * * * */
+/* * * * * * * * * * * * * * * * * * * */
+
 //Find the index of a game ID
 //Again, genius :D
 function findIndex(array, id) {
@@ -825,3 +968,62 @@ function findIndex(array, id) {
 	}
 	return -1;
 }
+
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * Show empty JQM popup  * * * * */
+/* * * * * * * * * * * * * * * * * * * */
+
+function showBackground() {
+	$('<a href="#popup" data-rel="dialog">').appendTo('body').click().remove();
+}
+
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * Experimental features * * * * */
+/* * * * * * * * * * * * * * * * * * * */
+/*
+//Experimental update from the web, currently only checks for updates, never actually called
+function getLatest() {
+	if ($.browser.msie) {
+	var xdr = new XDomainRequest();
+	xdr.onload = function() {
+					var current = data.about[1].value;
+					var latest = xdr.responseText;
+					if (current < latest) $().toastmessage('showNoticeToast', 'A new firmware is available for download: '+latest);
+					$('.toast-container').css('margin-left','-'+$('.toast-container').width()/2+'px');
+				}
+	xdr.open("get", 'http://devfaw.com/latest.php');
+	xdr.send();
+	}
+	else {
+		$.ajax({
+			type: "GET",
+			url: "http://devfaw.com/latest.php",
+			cache: false,
+			success: function(latest) {
+				var current = data.about[1].value;
+				if (current < latest) $().toastmessage('showNoticeToast', 'A new firmware is available for download: '+latest);
+				$('.toast-container').css('margin-left','-'+$('.toast-container').width()/2+'px');
+			}
+		});
+	}
+}
+
+//The error system from earlier, needs work
+function getErrors() {
+	$.ajax({
+		type: "GET",
+		url: "data.xml",
+		dataType: "xml",
+		cache: false,
+		success: function(xml) {
+			var error = parseInt($(xml).find('EMERGENCY').text());
+			switch (error) {
+				case 2:
+					$().toastmessage('showErrorToast', 'Disc Read Error, reset your console!');
+					break;
+				default:
+					break;
+			}
+		}
+	});
+}*/
