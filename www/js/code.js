@@ -24,7 +24,7 @@ $(document).delegate('#slide', 'pagecreate',function(event) {
 
 //Event to create Folder Structure
 $(document).delegate('#chooser', 'pagecreate',function(event) {
-	getFolderStructure();
+	makeFolderStructure();
 });
 
 //Some fixes for nested folders in Folder Structure
@@ -36,12 +36,12 @@ $(document).delegate(':jqmData(url^=chooser)', 'pagebeforecreate', function(even
 
 //Event to create About
 $(document).delegate('#about', 'pagecreate',function(event) {
-	getAbout();
+	makeAbout();
 });
 
 //Event to create Game List
 $(document).delegate('#alpha', 'pagecreate',function(event) {
-	getList();
+	makeListTab();
 });
 
 /* * * * * * * * * * * * * * * * * * * */
@@ -127,6 +127,9 @@ function getData() {
 						//Else use the saved stats
 						saveData=response;
 					}
+					//Experimental pre-loading of the probably most used menus
+					$.mobile.loadPage('#alpha');
+					$.mobile.loadPage('#chooser');
 				},
 				error: function() {
 					//Error? Probably old firmware, show error popup
@@ -138,11 +141,11 @@ function getData() {
 					$('.toast-container').css('margin-left','-'+$('.toast-container').width()/2+'px');
 					//Still make a new empty object, so we can still use it this session
 					saveData={};
+					//Experimental pre-loading of the probably most used menus
+					$.mobile.loadPage('#alpha');
+					$.mobile.loadPage('#chooser');
 				}
 			});
-			//Experimental pre-loading of the probably most used menus
-			$.mobile.loadPage('#alpha');
-			$.mobile.loadPage('#chooser');
 		}
 	});
 }
@@ -180,7 +183,7 @@ function makeSlide() {
 /* * * * * * * * * * * * * * * * * * * */
 
 //Create the folder Structure
-function getFolderStructure() {
+function makeFolderStructure() {
 	$("#content").html("");
 	$('<ul id="contentlist" data-role="listview" data-inset="true">').appendTo("#content");
 	var dir;
@@ -249,7 +252,7 @@ function getFolderStructure() {
 /* * * * * * * * * * * * * * * * * * * */
 
 //Make the Alphabetic Game List
-function getList() {
+function makeListTab() {
 	//Copy the ISOList! We don't want to mess up the other menus
 	var ISOlist = data.ISOlist.slice();
 	//Make it alpabetically listed
@@ -306,13 +309,13 @@ function getList() {
 /* * * * * * * * * * * * * * * * * * * */
 
 //Create the Most Played list
-function getMostPlayed() {
+function makeMostPlayedTab() {
 	//We can't know from what tab we came, so we always pause the EasyDate plugin
 	$.easydate.pause();
 	//Copy the ISOList! We don't want to mess up the other menus
 	var ISOlist = data.ISOlist.slice();
 	//To speed switching between tabs up, we hide the alphabetic list and show a short "special" list
-	//Because the special lists can change in one use, we always refresh those, but only load the alphabetic list once
+	//Because the special lists can change in one use, we always recreate those, but only load the alphabetic list once
 	$('#speclister').show();
 	$('#lister').hide();
 	$("#speclister").html('<ul id="speclist" data-role="listview" data-filter="true" data-inset="true"></ul>');
@@ -370,11 +373,11 @@ function getMostPlayed() {
 /* * * * * * * * * * * * * * * * * * * */
 
 //Create the Recent list
-function getRecent() {
+function makeRecentTab() {
 	//Copy the ISOList! We don't want to mess up the other menus
 	var ISOlist = data.ISOlist.slice();
 	//To speed switching between tabs up, we hide the alphabetic list and show a short "special" list
-	//Because the special lists can change in one use, we always refresh those, but only load the alphabetic list once
+	//Because the special lists can change in one use, we always recreate those, but only load the alphabetic list once
 	$('#speclister').show();
 	$('#lister').hide();
 	$("#speclister").html('<ul id="speclist" data-role="listview" data-filter="true" data-inset="true"></ul>');
@@ -433,9 +436,9 @@ function getRecent() {
 /* * * * * * * * * * * * * * * * * * * */
 
 //Create the About screen
-function getAbout() {
+function makeAbout() {
 	//Current Web Interface version, update it!
-	var version = "1.08";
+	var version = "1.09";
 	//Long HTML ftw
 	$("#info").html('<ul data-role="listview" data-inset="true"><li>Web Interface version '+version+'</li><li>Interface created using jQuery Mobile</li><li>Cover Slide created using Galleria</li><li>Interface made by Mr_Waffle</li></ul><a id="resetStatsButton" href="#" onclick="resetStats()" data-inline="true" data-role="button">Reset Game Stats</a>');
 	$('<ul id="infolist" data-role="listview" data-inset="true">').prependTo("#info");
@@ -461,7 +464,7 @@ function getAbout() {
 function gameInfo(id, name) {
 	var url = 'covers/'+id+'.xml';
 	//Haxxed dialog
-	$('<a href="#popup" data-rel="dialog">').appendTo('body').click().remove();
+	showBackground();
 	$.ajax({
 		type: "GET",
 		url: url,
@@ -600,22 +603,84 @@ function launchGame(id) {
 /* * * * * * * * * * * * * * * * * * * */
 
 //Create the fav lists tab
-function getFavLists() {
+function makeFavListsTab() {
 	//Copy the ISOList! We don't want to mess up the other menus
 	var ISOlist = data.ISOlist.slice();
 	//To speed switching between tabs up, we hide the alphabetic list and show a short "special" list
-	//Because the special lists can change in one use, we always refresh those, but only load the alphabetic list once
+	//Because the special lists can change in one use, we always recreate those, but only load the alphabetic list once
 	$('#speclister').show();
 	$('#lister').hide();
-	$("#speclister").html('<ul id="speclist" data-role="listview" data-filter="true" data-inset="true"></ul>');
+	$("#speclister").html('<ul id="speclist" data-role="listview" data-inset="true"></ul>');
 	$('<li data-role="list-divider">').html('<h3>Favorites</h3>').appendTo("#speclist");
-	$('<li>').html('<h3><label for="favListSelector">Select a list!</label></h3><select name="favListDropDown" id="favListDropDown" data-theme="a" data-icon="arrow-d" data-inline="true"><option value="test">test</option></select><p></p>').appendTo("#speclist");
+	var savedFavLists = saveData['FavLists'];
+	var tabHTML='';
+	if (savedFavLists == null) {
+		$('<li>').html('<h3>No favorite lists found! Click Management to create one!</h3>').appendTo('#speclist');
+		tabHTML='<a onclick="manageFavPopup();showBackground()" href="#" data-role="button" data-icon="gear">Management</a>'
+	}
+	else {
+		if (typeof(savedFavLists)!='object') savedFavLists=JSON.parse(savedFavLists);
+		var favLists = [];
+		for (var i in savedFavLists) {
+			favLists.push(i);
+		}
+		var favListsHTML='';
+		for (var i=0;i<favLists.length;i++) {
+			favListsHTML+='<option value="'+favLists[i]+'">'+unescape(favLists[i])+'</option>';
+		}
+		tabHTML='<label for="favListSelector">Select a list!</label></h3><select name="favListDropDown" id="favListDropDown" data-theme="a" data-icon="arrow-d" onchange="getFavList(this.value)">'+favListsHTML+'</select><a onclick="manageFavPopup();showBackground()" href="#" data-role="button" data-icon="gear">Management</a>';
+		getFavList(favLists[0]);
+	}
+	$('<div id="favTabOptions" class="ui-hide-label">').html(tabHTML).prependTo("#speclister");
 	//Magic!
 	$("#speclist").listview();
 	$("#speclister").trigger('create');
 	//IE makes the bar disappear sometimes, remove and add it back!
 	$('#IEFix').removeClass('ui-header ui-bar-a');
 	$('#IEFix').addClass('ui-header ui-bar-a');
+}
+
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * List favlist games  * * * * */
+/* * * * * * * * * * * * * * * * * * * */
+
+function getFavList(listName) {
+	var savedFavLists = saveData['FavLists'];
+	//if (typeof(savedFavLists)!='object') savedFavLists=JSON.parse(savedFavLists);
+	var games = savedFavLists[listName];
+	var iso;
+	var id;
+	var cover;
+	var stored;
+	var dataChange=false;
+	var timesPlayed;
+	var HTML='<li data-role="list-divider"><h3>Favorites</h3></li>';
+	for (var i=0;i<=games.length;i++) {
+		iso = games[i].name;
+		id = games[i].id;
+		//if (id=='0000000000000000000000000000000000000000') continue;
+		cover = 'covers/'+games[i].id+'.jpg';
+		stored = saveData[games[i].id];
+		timesPlayed;
+		if (stored == null) {
+			saveData[id] = {"timesPlayed": 0, "lastPlayed": 0};
+			timesPlayed = 0;
+			dataChange=true;
+		}
+		else timesPlayed = stored.timesPlayed;
+		HTML+='<li id="'+iso+'"><a href="#" onclick="prepGame(\''+id+'\',\''+escape(iso)+'\')"><img id="cover" src="'+cover+'"/><h3>'+iso+'</h3><p>Played <span class="timesPlayed" id="'+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a>';
+	}
+	//Native approach should be faster
+	document.getElementById('speclist').innerHTML=HTML;
+	if ($('#speclist>li').length == 1) $('<li>').html('<h3>This favorite list is empty!</h3><p></p>').appendTo("#speclist");	
+	//Magic!
+	$("#speclist").listview();
+	$("#speclister").trigger('create');
+	
+	if (dataChange) {
+		$.post('store.sh',JSON.stringify(saveData));
+	}
+	
 }
 
 /* * * * * * * * * * * * * * * * * * * */
@@ -631,6 +696,7 @@ function addFavPopup(id, name) {
 		noFavLists(id, name);
 		return;
 	}
+	//if (typeof(savedFavLists)!='object') savedFavLists=JSON.parse(savedFavLists);
 	//Otherwise, parse the lists
 	//Get ALL the list names!
 	var favLists = [];
@@ -658,13 +724,20 @@ function addFavPopup(id, name) {
 //Management popup
 //Universal
 function manageFavPopup(id, name) {
+	$('.toast-container').css('top',$('.logo')[0].height+'px');
 	//Get all current list data
 	var savedFavLists = saveData['FavLists'];
 	//If there are no lists made yet, create a popup asking for the first list EVAR
 	if (savedFavLists == null && $('#createFavList').length==0) {
-		noFavLists(id, name);
+		if (id) noFavLists(id, name);
+		else noFavLists(null, null, true);
 		return;
 	}
+	//If there's no management popup yet, create one
+	if ($('#favListManagementToast').length==0) {
+		$().toastmessage('showNormalToast', '<div class="favListManagementToast"></div>');
+	}
+	//if (typeof(savedFavLists)!='object') savedFavLists=JSON.parse(savedFavLists);
 	//Otherwise, parse the lists
 	//Get ALL the list names!
 	var favLists = [];
@@ -684,9 +757,11 @@ function manageFavPopup(id, name) {
 		favListsHTML+='<option value="'+favLists[i]+'">'+unescape(favLists[i])+'</option>';
 	}
 	//Preparing popup HTML
-	var managementHTML = '<div class="favListManagementToast">';
+	var managementHTML = '';
+	var createList='createFavList()';
 	//Add from info HTML
 	if (id) {
+		createList='createFavList(\''+id+','+name+'\')';
 		//Remove from list HTML
 		var removeListsHTML="";
 		var removeLists = findList(id);
@@ -695,7 +770,9 @@ function manageFavPopup(id, name) {
 		}
 		managementHTML+='<label for="favListRemoveDropDown" class="select">Select a list to remove this game from:</label><select name="favListRemoveDropDown" id="favListRemoveDropDown" data-theme="a" data-icon="arrow-d" data-inline="true">'+removeListsHTML+'</select><a href="#" onclick="removeFav(\''+id+'\')" data-role="button" data-inline="true">Remove from list</a><hr/>';
 		//Add to list HTML
-		if (favLists.length > 1 && removeLists.length != favLists.length) managementHTML+='<label for="favListDropDown" class="select">Select a list to add this game to:</label><select name="favListDropDown" id="favListDropDown" data-theme="a" data-icon="arrow-d" data-inline="true">'+favListsHTML+'</select><a href="#" onclick="addFav(\''+id+'\',\''+name+'\')" data-role="button" data-inline="true">Add to list</a><hr/>';
+		if (favLists.length > 1 && removeLists.length != favLists.length) {
+			managementHTML+='<label for="favListDropDown" class="select">Select a list to add this game to:</label><select name="favListDropDown" id="favListDropDown" data-theme="a" data-icon="arrow-d" data-inline="true">'+favListsHTML+'</select><a href="#" onclick="addFav(\''+id+'\',\''+name+'\')" data-role="button" data-inline="true">Add to list</a><hr/>';
+		}
 	}
 	else {
 		//From favlist only options
@@ -703,18 +780,18 @@ function manageFavPopup(id, name) {
 	}
 	//Some general HTML here
 	//New list HTML
-	managementHTML+='<label for="favListName">Create a new list:</label><center><input id="favListName" style="max-width:200px" value="List Name" type="text"/></center><a onclick="createFavList(\''+id+'\',\''+name+'\')" href="#" data-role="button" data-inline="true">Create List</a><hr/>';
+	managementHTML+='<label for="favListName">Create a new list:</label><center><input id="favListName" style="max-width:200px" value="List Name" type="text"/></center><a onclick="'+createList+'" href="#" data-role="button" data-inline="true">Create List</a><hr/>';
 	//Close button
 	if (id) {
 		managementHTML+='<a onclick="$().toastmessage(\'removeToast\',$(\'.toast-item:last\'))" href="#" data-role="button" data-inline="true">Close</a>';
 	}
 	else {
-		managementHTML+='<a onclick="$(\'#popup\').dialog(\'close\');$().toastmessage(\'removeToast\',$(\'.toast-item\')))" href="#" data-role="button" data-inline="true">Close</a>';
+		managementHTML+='<a onclick="$(\'#popup\').dialog(\'close\');$().toastmessage(\'removeToast\',$(\'.toast-item\'))" href="#" data-role="button" data-inline="true">Close</a>';
 	}
 	//End this madness
-	managementHTML+='</div>';
+	$('#favListManagementToast').html(managementHTML);
 	//Finally display everything
-	$().toastmessage('showNormalToast', managementHTML);
+	//$().toastmessage('showNormalToast', managementHTML);
 	//JQM magic
 	$('.favListManagementToast').trigger('create');
 }
@@ -725,12 +802,15 @@ function manageFavPopup(id, name) {
 
 //Create a new list, optional id and name argument to populate list on creation
 function createFavList(id, name) {
+	console.log(id);
+	console.log(name);
 	//Create a new list, currently only possible through the popup, so we always get the value from there
 	var listName = escape($('#favListName')[0].value);
 	//Get the currently saved lists
 	var favLists = saveData['FavLists'];
 	//No lists? New object
 	if (favLists == null) favLists={};
+	//if (typeof(favLists)!='object') favLists=JSON.parse(favLists);
 	var gameList = [];
 	//An ID is given as argument? Populate list with ID and name
 	if (id) {
@@ -748,7 +828,7 @@ function createFavList(id, name) {
 	//Complicated, I know
 	favLists[listName]=gameList;
 	//Stringify that thing and save it
-	saveData['FavLists'] = JSON.stringify(favLists);
+	saveData['FavLists'] = favLists;
 	$.post('store.sh', JSON.stringify(saveData));
 }
 
@@ -764,14 +844,16 @@ function addFav(id, name) {
 	//Get the gameList array from the favLists object with the listName key
 	var gameList = favLists[listName];
 	//Dummy data present? Slice that thing off
-	if (gameList[0].id=="0000000000000000000000000000000000000000") gameList.splice(0,1);
+	if (gameList[0].id=="0000000000000000000000000000000000000000") {
+		gameList.splice(0,1);
+	}
 	//Push new game to array
 	gameList.push({
 					"id" : id,
 					"name" : name });
 	//Save again
 	favLists[listName]=gameList;
-	saveData['FavLists'] = JSON.stringify(favLists);
+	saveData['FavLists'] = favLists;
 	$.post('store.sh', JSON.stringify(saveData));
 	//Remove the last toast upon completion
 	$().toastmessage('removeToast',$('.toast-item:last'))
@@ -788,6 +870,7 @@ function removeFav(id, favList) {
 	if (favList) listName = favList;
 	else listName = $('#favListRemoveDropDown')[0].value;
 	var favLists = saveData['FavLists'];
+	//if (typeof(favLists)!='object') favLists=JSON.parse(favLists);
 	//Get the gameList array from the favLists object with the listName key
 	var gameList = favLists[listName];
 	//Find the index in the given array with the given ID
@@ -802,7 +885,7 @@ function removeFav(id, favList) {
 	}
 	//Save
 	favLists[listName]=gameList;
-	saveData['FavLists'] = JSON.stringify(favLists);
+	saveData['FavLists'] = favLists;
 	$.post('store.sh', JSON.stringify(saveData));
 }
 
@@ -841,12 +924,14 @@ function updatePlayTimes(id) {
 //Reset stats from the About menu
 function resetStats() {
 	for (var i = 0; i<data.ISOlist.length; i++) {
-		createCookie(data.ISOlist[i].id, '{"timesPlayed": 0, "lastPlayed": 0}');
+		saveData[data.ISOlist[i].id]={"timesPlayed": 0, "lastPlayed": 0};
 	}
 	$('#resetStatsButton>span>span').html("Done!");
-	var resetText = setTimeout("$('#resetStatsButton>span>span').html('Reset Game Stats')","3000");
+	var resetText = setTimeout("$('#resetStatsButton>span>span').html('Reset Game Stats')",3000);
 	//Update the visual playtimes
 	updatePlayTimes();
+	//Save to server
+	$.post('store.sh', JSON.stringify(saveData));
 }
 
 /* * * * * * * * * * * * * * * * * * * */
@@ -854,8 +939,17 @@ function resetStats() {
 /* * * * * * * * * * * * * * * * * * * */
 
 //Predefined No Fav Lists message
-function noFavLists(id, name) {
-	$().toastmessage('showErrorToast', '<div id="createFavList">No favourite lists found! Please create one.<br/><center><input id="favListName" style="width:40%" value="List Name" type="text"/></center><a onclick="createFavList(\''+id+'\',\''+name+'\')" href="#" data-role="button" data-inline="true">Create List</a></div>');
+function noFavLists(id, name, tabbed) {
+	$('.toast-container').css('top',$('.logo')[0].height+'px');
+	onClick='';
+	console.log(id);
+	console.log(name);
+	console.log(tabbed);
+	if (tabbed) {
+		onClick='createFavList();$().toastmessage(\'removeToast\',$(\'.toast-item:last\'))';
+	}
+	else onClick='createFavList(\''+id+'\',\''+name+'\')';
+	$().toastmessage('showErrorToast', '<div id="createFavList">No favourite lists found! Please create one.<br/><center><input id="favListName" style="width:40%" value="List Name" type="text"/></center><a onclick="'+onClick+'" href="#" data-role="button" data-inline="true">Create List</a></div>');
 	//JQM magic
 	$('#createFavList').trigger('create');
 	//We're done here
@@ -887,6 +981,14 @@ function findIndex(array, id) {
 		if (array[i].id==id) return i;
 	}
 	return -1;
+}
+
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * Show empty JQM popup  * * * * */
+/* * * * * * * * * * * * * * * * * * * */
+
+function showBackground() {
+	$('<a href="#popup" data-rel="dialog">').appendTo('body').click().remove();
 }
 
 /* * * * * * * * * * * * * * * * * * * */
