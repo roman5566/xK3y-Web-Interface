@@ -936,6 +936,7 @@ function addFav(id, name, init) {
 	//Remove the last toast upon completion
 	if (init) {
 		$().toastmessage('removeToast',$('.toast-item:last'));
+		gameInfo(id, name);
 	}
 	else {
 		manageFavPopup(id, name);
