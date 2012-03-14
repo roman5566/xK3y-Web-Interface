@@ -550,14 +550,6 @@ function prepGame(id, name) {
 	if (CoverSlide) {
 		if (CoverSlide.isFullscreen()) CoverSlide.exitFullscreen();
 	}
-	//Update the cookies, soon to be server side storage
-	var stored = saveData[id];
-	var timesPlayed = stored.timesPlayed;
-	saveData[id] = {"timesPlayed": (timesPlayed+1), "lastPlayed": Date.parse(new Date)};
-	$.post('store.sh',JSON.stringify(saveData));
-	//Update the playtimes on the menu's
-	updatePlayTimes(id);
-	//launchGame(id);
 }
 
 /* * * * * * * * * * * * * * * * * * * */
@@ -566,8 +558,11 @@ function prepGame(id, name) {
 
 //Actually loads the game
 function launchGame(id) {
-   var url = "launchgame.sh?"+id;
-   $.ajax({
+	var url = "launchgame.sh?"+id;
+	//Prep for the data update
+	var stored = saveData[id];
+	var timesPlayed = stored.timesPlayed;
+	$.ajax({
 		type: "GET",
 		url: "data.xml",
 		dataType: "xml",
@@ -577,15 +572,25 @@ function launchGame(id) {
 			var guistate = $(xml).find("GUISTATE").text();
 			if (tray == 0) {
                 $.get(url);
+				//Update data on xk3y
+				saveData[id] = {"timesPlayed": (timesPlayed+1), "lastPlayed": Date.parse(new Date)};
+				$.post('store.sh',JSON.stringify(saveData));
+				//Update the playtimes on the menus
+				updatePlayTimes(id);
             } else {
                 if (tray == 1 && guistate == 1) {
                     $().toastmessage('showNoticeToast', 'Please open your DVD tray.');
-					$('html,body').animate({scrollTop: document.body.scrollHeight}, 1000, function() {$.mobile.silentScroll(document.body.scrollHeight)});
+					scrollDown();
 					$.get(url);
+					//Update data on xk3y
+					saveData[id] = {"timesPlayed": (timesPlayed+1), "lastPlayed": Date.parse(new Date)};
+					$.post('store.sh',JSON.stringify(saveData));
+					//Update the playtimes on the menus
+					updatePlayTimes(id);
                 } else {
                     if (tray == 1 && guistate == 2) {
                         $().toastmessage('showNoticeToast', 'A game appears to be already loaded, please open your DVD tray and click "Play Game" again.');
-						$('html,body').animate({scrollTop: document.body.scrollHeight}, 1000, function() {$.mobile.silentScroll(document.body.scrollHeight)});
+						scrollDown();
                     }
                 }
 			}
@@ -715,6 +720,7 @@ function addFavPopup(id, name) {
 	//If there's no popup yet, create one! Otherwise don't bother, there's already one ;)
 	if ($('#favListDropDown').length==0) {
 		$().toastmessage('showNormalToast', '<div class="favListAddToast"><label for="favListDropDown" class="select">Select a list to add this game to:</label><select name="favListDropDown" id="favListDropDown" data-theme="a" data-icon="star" data-inline="true">'+favListsHTML+'</select><a href="#" onclick="addFav(\''+id+'\',\''+name+'\',true)" data-role="button" data-inline="true" data-icon="check">Confirm</a><a href="#" onclick="$().toastmessage(\'removeToast\',$(\'.toast-item:last\'))" data-role="button" data-inline="true" data-icon="delete">Cancel</a></div>');
+		scrollDown();
 		//JQM magic
 		$('.favListAddToast').trigger('create');
 	}
@@ -751,6 +757,7 @@ function manageFavPopup(id, name) {
 						type: "normal",
 						close: closeAction
 		});
+		scrollDown();
 	}
 	else {
 	
@@ -813,8 +820,6 @@ function manageFavPopup(id, name) {
 	}
 	//End this madness
 	$('.favListManagementToast').html(managementHTML);
-	//Finally display everything
-	//$().toastmessage('showNormalToast', managementHTML);
 	//JQM magic
 	$('.favListManagementToast').trigger('create');
 }
@@ -843,6 +848,7 @@ function createFavList(id, name, tabbed) {
 						sticky: false,
 						close : function(){}
 		});
+		scrollDown();
 		return;
 		}
 	}
@@ -882,6 +888,7 @@ function createFavList(id, name, tabbed) {
 						sticky: false,
 						close : function(){}
 	});
+	scrollDown();
 }
 
 /* * * * * * * * * * * * * * * * * * * */
@@ -905,6 +912,7 @@ function removeFavList() {
 						sticky: false,
 						close : function(){}
 	});
+	scrollDown();
 	saveData['FavLists'] = favLists;
 	$.post('store.sh', JSON.stringify(saveData));
 	manageFavPopup();
@@ -1027,9 +1035,6 @@ function resetStats() {
 function noFavLists(id, name, tabbed) {
 	$('.toast-container').css('top',$('.logo')[0].height+'px');
 	onClick='';
-	console.log(id);
-	console.log(name);
-	console.log(tabbed);
 	if (tabbed) {
 		onClick='$().toastmessage(\'removeToast\',$(\'.toast-item:last\'));createFavList(null,null,true);';
 	}
@@ -1037,6 +1042,7 @@ function noFavLists(id, name, tabbed) {
 		onClick='createFavList(\''+id+'\',\''+name+'\',false)';
 	}
 	$().toastmessage('showErrorToast', '<div id="createFavList">No favourite lists found! Please create one.<br/><center><input id="favListName" style="width:40%" value="List Name" type="text"/></center><a onclick="'+onClick+'" href="#" data-role="button" data-inline="true">Create List</a></div>');
+	scrollDown();
 	//JQM magic
 	$('#createFavList').trigger('create');
 	//We're done here
@@ -1076,6 +1082,14 @@ function findIndex(array, id) {
 
 function showBackground() {
 	$('<a href="#popup" data-rel="dialog">').appendTo('body').click().remove();
+}
+
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * Scroll to the bottom  * * * * */
+/* * * * * * * * * * * * * * * * * * * */
+
+function scrollDown() {
+	$('html,body').animate({scrollTop: document.body.scrollHeight}, 1000, function() {$.mobile.silentScroll(document.body.scrollHeight)});
 }
 
 /* * * * * * * * * * * * * * * * * * * */
