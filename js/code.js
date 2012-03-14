@@ -139,7 +139,6 @@ function getData() {
 						sticky: false,
 						close: function(){}
 					});
-					$('.toast-container').css('margin-left','-'+$('.toast-container').width()/2+'px');
 					//Still make a new empty object, so we can still use it this session
 					saveData={};
 					//Experimental pre-loading of the probably most used menus
@@ -475,8 +474,6 @@ function gameInfo(id, name) {
 			//If there's no info popup yet, let's make one!
 			if ($('#infoblock').length==0) {
 				$().toastmessage('showNormalToast', '<div id="infoblock" class="ui-grid-a"><div id="infoblock1" class="ui-block-a"></div><div id="infoblock2" class="ui-block-b"></div></div>');
-				$('.toast-container').css('margin-left','-'+$('.toast-container').width()/2+'px');
-				$('.toast-container').css('top',$('.logo')[0].height+'px');
 			}
 			//Prepare fav button HTML
 			var favButton;
@@ -514,8 +511,6 @@ function gameInfo(id, name) {
 			//No game.xml? Still create info popup, just with default game.xml contents
 			if ($('#infoblock').length==0) {
 				$().toastmessage('showNormalToast', '<div id="infoblock" class="ui-grid-a"><div id="infoblock1" class="ui-block-a"></div><div id="infoblock2" class="ui-block-b"></div></div>');
-				$('.toast-container').css('margin-left','-'+$('.toast-container').width()/2+'px');
-				$('.toast-container').css('top',$('.logo')[0].height+20+'px');
 			}
 			//Same stuff as above
 			var favButton;
@@ -734,7 +729,6 @@ function addFavPopup(id, name) {
 //Management popup
 //Universal
 function manageFavPopup(id, name) {
-	$('.toast-container').css('top',$('.logo')[0].height+'px');
 	//Get all current list data
 	var savedFavLists = saveData['FavLists'];
 	//If there are no lists made yet, create a popup asking for the first list EVAR
@@ -842,14 +836,14 @@ function createFavList(id, name, tabbed) {
 	}
 	else {
 		if (listName in favLists) {
-		$().toastmessage('showToast', {
-						text: 'List "'+unescape(listName)+'" already exists!',
-						type: "error",
-						sticky: false,
-						close : function(){}
-		});
-		scrollDown();
-		return;
+			$().toastmessage('showToast', {
+							text: 'List "'+unescape(listName)+'" already exists!',
+							type: "error",
+							sticky: false,
+							close : function(){}
+			});
+			scrollDown();
+			return;
 		}
 	}
 	var gameList = [];
