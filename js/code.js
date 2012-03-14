@@ -6,9 +6,10 @@
 /* * * Events, fixes, global stuff * * */
 /* * * * * * * * * * * * * * * * * * * */
 
-//Remove all toasts on pagechange event
-$(document).delegate(document, "pagebeforechange", function( e, data ) {
-	//if ($('.toast-container').length!=0) $('#popup').dialog('close');
+$(document).delegate(document, "mobileinit", function() {
+	if (window.location.hash != "" || window.location.hash != "#") {
+		$.mobile.changePage('#');
+	}
 });
 
 //Add fitted logos to all pages
@@ -617,9 +618,9 @@ function makeFavListsTab() {
 	
 	var savedFavLists = saveData['FavLists'];
 	var tabHTML='';
-	if (savedFavLists == null) {
+	if ($.isEmptyObject(savedFavLists)) {
 		$('<li>').html('<h3>No favorite lists found! Click Management to create one!</h3>').appendTo('#speclist');
-		tabHTML='<a onclick="manageFavPopup();showBackground()" href="#" data-role="button" data-icon="gear">Management</a>'
+		tabHTML='<a onclick="manageFavPopup();showBackground()" href="#" data-role="button" data-icon="gear">Management</a>';
 	}
 	else {
 		var favLists = [];
@@ -639,7 +640,7 @@ function makeFavListsTab() {
 	//IE makes the bar disappear sometimes, remove and add it back!
 	$('#IEFix').removeClass('ui-header ui-bar-a');
 	$('#IEFix').addClass('ui-header ui-bar-a');
-	if (savedFavLists!=null) {
+	if ($.isEmptyObject(savedFavLists)==false) {
 		getFavList(favLists[0]);
 	}
 }
@@ -788,7 +789,6 @@ function manageFavPopup(id, name) {
 		for (var i=0;i<removeLists.length;i++) {
 			removeListsHTML+='<option value="'+removeLists[i]+'">'+unescape(removeLists[i])+'</option>';
 		}
-		//console.log(removeListsHTML);
 		if (removeListsHTML.length > 1) {
 			managementHTML+='<label for="favListRemoveDropDown" class="select">Select a list to remove this game from:</label><select name="favListRemoveDropDown" id="favListRemoveDropDown" data-theme="a" data-icon="arrow-d" data-inline="true">'+removeListsHTML+'</select><a href="#" onclick="removeFav(\''+id+'\', \''+name+'\')" data-role="button" data-inline="true">Remove from list</a><hr/>';
 		}
@@ -800,7 +800,9 @@ function manageFavPopup(id, name) {
 	else {
 		createList='createFavList(null,null,true)';
 		//From favlist only options
-		managementHTML+='<label for="ListRemoveDropDown" class="select">Select a list to remove:</label><select name="ListRemoveDropDown" id="ListRemoveDropDown" data-theme="a" data-icon="arrow-d" data-inline="true">'+favListsHTML+'</select><a href="#" onclick="removeFavList()" data-role="button" data-inline="true">Remove list</a><hr/>';
+		if (favListsHTML.length > 1) {
+			managementHTML+='<label for="ListRemoveDropDown" class="select">Select a list to remove:</label><select name="ListRemoveDropDown" id="ListRemoveDropDown" data-theme="a" data-icon="arrow-d" data-inline="true">'+favListsHTML+'</select><a href="#" onclick="removeFavList()" data-role="button" data-inline="true">Remove list</a><hr/>';
+		}
 	}
 	//Some general HTML here
 	//New list HTML
@@ -908,6 +910,7 @@ function removeFavList() {
 	});
 	scrollDown();
 	saveData['FavLists'] = favLists;
+
 	$.post('store.sh', JSON.stringify(saveData));
 	manageFavPopup();
 }
