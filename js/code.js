@@ -234,7 +234,7 @@ function makeFolderStructure() {
 			par1 = escape(par1);
 			if ($('ul#'+par1).length==0) $('<ul id="'+par1+'" data-inset="true">').appendTo(document.getElementById(par));
 		}
-		$('<li id="'+name+'">').html('<a href="#" onclick="prepGame(\''+id+'\',\''+escape(name)+'\')"><img src="'+cover+'"/><h3>'+name+'</h3><p>Played <span class="timesPlayed" id="'+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a>').appendTo(document.getElementById(par1));
+		$('<li>').html('<a href="#" onclick="prepGame(\''+id+'\',\''+escape(name)+'\')"><img src="'+cover+'"/><h3>'+name+'</h3><p>Played <span class="timesPlayed" id="'+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a>').appendTo(document.getElementById(par1));
 	};
 	//Prepend the ... 'folders' that go up a directory
 	$('ul[id$="-nest"]').each(function() {
@@ -292,7 +292,7 @@ function makeListTab() {
 			HTML+='<li id="'+letter+'-divider" data-role="list-divider"><h3>'+letter+'</h3>';
 			//$('<li id="'+letter+'-divider" data-role="list-divider">').html('<h3>'+letter+'</h3>').appendTo("#isolist");
 		}
-		HTML+='<li id="'+iso+'"><a href="#" onclick="prepGame(\''+id+'\',\''+escape(iso)+'\')"><img id="cover" src="'+cover+'"/><h3>'+iso+'</h3><p>Played <span class="timesPlayed" id="'+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a>';
+		HTML+='<li><a href="#" onclick="prepGame(\''+id+'\',\''+escape(iso)+'\')"><img id="cover" src="'+cover+'"/><h3>'+iso+'</h3><p>Played <span class="timesPlayed" id="'+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a>';
 		//$('<li id="'+iso+'">').html('<a href="#" onclick="prepGame(\''+id+'\',\''+escape(iso)+'\')"><img id="cover" src="'+cover+'"/><h3>'+iso+'</h3><p>Played <span class="timesPlayed" id="'+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a>').appendTo("#isolist");
 	}
 	//Native approach should be faster
@@ -508,7 +508,7 @@ function gameInfo(id, name) {
 			//JQM magic
 			$('#infoblock').trigger('create');
 		},
-		error: function(xml) {
+		error: function() {
 			//No game.xml? Still create info popup, just with default game.xml contents
 			if ($('#infoblock').length==0) {
 				$().toastmessage('showNormalToast', '<div id="infoblock" class="ui-grid-a"><div id="infoblock1" class="ui-block-a"></div><div id="infoblock2" class="ui-block-b"></div></div>');
