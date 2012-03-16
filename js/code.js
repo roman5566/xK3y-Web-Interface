@@ -15,7 +15,6 @@ $(document).delegate(document, "mobileinit", function() {
 //Add fitted logos to all pages
 $(document).ready(function() {
 	$('[data-role="page"]').each(function() {$(this).prepend('<img class="logo" src="img/logo.png" style="max-width:'+$(window).width()+"px"+';">')});
-	//$('center').append('<div data-role="page" id="popup" data-theme="a" data-title="Popup"><img class="logo" src="img/logo.png" style="max-width:'+$(window).width()+"px"+';"></div>');
 });
 
 //Event to create Cover Slide
