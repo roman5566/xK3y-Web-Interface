@@ -6,15 +6,11 @@
 /* * * Events, fixes, global stuff * * */
 /* * * * * * * * * * * * * * * * * * * */
 
-$(document).delegate(document, "mobileinit", function() {
-	if (window.location.hash != "" || window.location.hash != "#") {
-		$.mobile.changePage('#');
-	}
-});
-
 //Add fitted logos to all pages
 $(document).ready(function() {
 	$('[data-role="page"]').each(function() {$(this).prepend('<img class="logo" src="img/logo.png" style="max-width:'+$(window).width()+"px"+';">')});
+	$.mobile.loadingMessage="caching...";
+	$.mobile.showPageLoadingMsg();
 });
 
 //Event to create Cover Slide
@@ -51,6 +47,7 @@ $(document).delegate('#alpha', 'pagecreate',function(event) {
 //Some global variables needed
 var data;
 var saveData;
+var cacheState=0;
 
 //Main function, grabs all data from xk3y and parses it
 function getData() {
@@ -245,6 +242,13 @@ function makeFolderStructure() {
 	if (dataChange) {
 		$.post('store.sh',JSON.stringify(saveData));
 	}
+
+	if (cacheState==0) {
+		cacheState=1;
+	}
+	else if (cacheState==1) {
+		$.mobile.hidePageLoadingMsg();
+	}
 }
 
 /* * * * * * * * * * * * * * * * * * * */
@@ -301,6 +305,13 @@ function makeListTab() {
 	
 	if (dataChange) {
 		$.post('store.sh',JSON.stringify(saveData));
+	}
+
+	if (cacheState==0) {
+		cacheState=1;
+	}
+	else if (cacheState==1) {
+		$.mobile.hidePageLoadingMsg();
 	}
 }
 
