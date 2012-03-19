@@ -1,3 +1,6 @@
+//Current Web Interface version, update it!
+var version = "1.11";
+
 /** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **/
 /** ** ** ** ** ** ** Init  ** ** ** ** ** ** ** **/
 /** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **/
@@ -448,8 +451,6 @@ function makeRecentTab() {
 
 //Create the About screen
 function makeAbout() {
-	//Current Web Interface version, update it!
-	var version = "1.09";
 	//Long HTML ftw
 	$("#info").html('<ul data-role="listview" data-inset="true"><li>Web Interface version '+version+'</li><li>Interface created using jQuery Mobile</li><li>Cover Slide created using Galleria</li><li>Interface made by Mr_Waffle</li></ul><a id="resetStatsButton" href="#" onclick="resetStats()" data-inline="true" data-role="button">Reset Game Stats</a>');
 	$('<ul id="infolist" data-role="listview" data-inset="true">').prependTo("#info");
