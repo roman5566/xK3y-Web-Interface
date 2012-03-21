@@ -701,7 +701,6 @@ function getFavList(listName) {
 function addFavPopup(id, name) {
 	//Get all current list data
 	var savedFavLists = saveData['FavLists'];
-	console.log('Saved favlists raw:' +savedFavLists);
 	//If there are no lists made yet, create a popup asking for the first list EVAR
 	if ($.isEmptyObject(savedFavLists)==true && $('#createFavList').length==0) {
 		noFavLists(id, name);
@@ -714,7 +713,6 @@ function addFavPopup(id, name) {
 	for (var i in savedFavLists) {
 		favLists.push(i);
 	}
-	console.log('Saved favlists:' +favLists);
 	//Create ALL the list options!
 	var favListsHTML="";
 	for (var i=0;i<favLists.length;i++) {
@@ -783,7 +781,6 @@ function manageFavPopup(id, name) {
 		}
 		favListsHTML+='<option value="'+favLists[i]+'">'+unescape(favLists[i])+'</option>';
 	}
-	//console.log(favListsHTML);
 	//Preparing popup HTML
 	var managementHTML = '';
 	var createList='';
@@ -997,12 +994,12 @@ function updatePlayTimes(id) {
 	//Specificly update a game
 	if (id) {
 		var data = $('span.'+id);
-		var stored = saveData[id];
-		var current = stored.timesPlayed;
+		var current = saveData[id].timesPlayed;
+		saveData[id] = {"timesPlayed": (current+1), "lastPlayed": Date.parse(new Date)};
+		var current = saveData[id].timesPlayed;
 		for (var i = 0; i<data.length; i++) {
 			data[i].innerHTML = current + (current == 1 ? " time" : " times");
 		}
-		saveData[id] = {"timesPlayed": (timesPlayed+1), "lastPlayed": Date.parse(new Date)};
 		$.post('store.sh',JSON.stringify(saveData));
 	}
 	//No ID specified? Clear all the games
