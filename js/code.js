@@ -160,13 +160,23 @@ function getData() {
 
 //Make the Cover Slide
 function makeSlide() {
-	var wwidth = $(window).width()-30;
+	var ISOlist = data.ISOlist.slice();
+	ISOlist.sort(function(x,y) { 
+		var a = String(x.name).toUpperCase(); 
+		var b = String(y.name).toUpperCase(); 
+		if (a > b) 
+			return 1 
+		if (a < b) 
+			return -1 
+		return 0; 
+	}); 
+	var wwidth = ($(window).width()-30);
 	var wheight = $(window).height();
 	$('#slidepage').html('<div id="slidepanel" style="width:100%;text-align:center"></div>');
 	$('#slidepanel').galleria({
 		width: wwidth,
 		height: wheight,
-		dataSource: data.ISOlist
+		dataSource: ISOlist
 	});
 	//Add the jQuery Mobile classes to the layer
 	Galleria.ready(function(options) {
