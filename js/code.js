@@ -233,7 +233,7 @@ function makeFolderStructure() {
 			par1 = escape(par1);
 			if ($('ul#'+par1).length==0) $('<ul id="'+par1+'" data-inset="true">').appendTo(document.getElementById(par));
 		}
-		$('<li>').html('<a href="#" onclick="prepGame(\''+id+'\',\''+escape(name)+'\')"><img src="'+cover+'"/><h3>'+name+'</h3><p>Played <span class="timesPlayed" id="'+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a>').appendTo(document.getElementById(par1));
+		$('<li>').html('<a href="#" onclick="prepGame(\''+id+'\',\''+escape(name)+'\')"><img src="'+cover+'"/><h3>'+name+'</h3><p>Played <span class="timesPlayed '+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a>').appendTo(document.getElementById(par1));
 	};
 	//Prepend the ... 'folders' that go up a directory
 	$('ul[id$="-nest"]').each(function() {
@@ -298,7 +298,7 @@ function makeListTab() {
 			HTML+='<li id="'+letter+'-divider" data-role="list-divider"><h3>'+letter+'</h3>';
 			//$('<li id="'+letter+'-divider" data-role="list-divider">').html('<h3>'+letter+'</h3>').appendTo("#isolist");
 		}
-		HTML+='<li><a href="#" onclick="prepGame(\''+id+'\',\''+escape(iso)+'\')"><img id="cover" src="'+cover+'"/><h3>'+iso+'</h3><p>Played <span class="timesPlayed" id="'+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a>';
+		HTML+='<li><a href="#" onclick="prepGame(\''+id+'\',\''+escape(iso)+'\')"><img id="cover" src="'+cover+'"/><h3>'+iso+'</h3><p>Played <span class="timesPlayed '+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a>';
 		//$('<li id="'+iso+'">').html('<a href="#" onclick="prepGame(\''+id+'\',\''+escape(iso)+'\')"><img id="cover" src="'+cover+'"/><h3>'+iso+'</h3><p>Played <span class="timesPlayed" id="'+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a>').appendTo("#isolist");
 	}
 	//Native approach should be faster
@@ -364,7 +364,7 @@ function makeMostPlayedTab() {
 			//Never played D: Get the hell out!
 			break;
 		}
-		HTML+='<li id="'+iso+'"><a href="#" onclick=\'prepGame(\"'+id+'\",\"'+escape(iso)+'\")\'><img id="cover" src="'+cover+'"/><h3>'+iso+'</h3><p>Played <span class="timesPlayed" id="'+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a></li>';
+		HTML+='<li id="'+iso+'"><a href="#" onclick=\'prepGame(\"'+id+'\",\"'+escape(iso)+'\")\'><img id="cover" src="'+cover+'"/><h3>'+iso+'</h3><p>Played <span class="timesPlayed '+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a></li>';
 		//$('<li id="'+iso+'">').html('<a href="#" onclick=\'prepGame(\"'+id+'\",\"'+escape(iso)+'\")\'><img id="cover" src="'+cover+'"/><h3>'+iso+'</h3><p>Played <span class="timesPlayed" id="'+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a>').appendTo("#speclist");
 	}
 	//Native approach should be faster
@@ -579,9 +579,6 @@ function launchGame(id) {
 			var guistate = $(xml).find("GUISTATE").text();
 			if (tray == 0) {
                 $.get(url);
-				//Update data on xk3y
-				saveData[id] = {"timesPlayed": (timesPlayed+1), "lastPlayed": Date.parse(new Date)};
-				$.post('store.sh',JSON.stringify(saveData));
 				//Update the playtimes on the menus
 				updatePlayTimes(id);
             } else {
@@ -589,9 +586,6 @@ function launchGame(id) {
                     $().toastmessage('showNoticeToast', 'Please open your DVD tray.');
 					scrollDown();
 					$.get(url);
-					//Update data on xk3y
-					saveData[id] = {"timesPlayed": (timesPlayed+1), "lastPlayed": Date.parse(new Date)};
-					$.post('store.sh',JSON.stringify(saveData));
 					//Update the playtimes on the menus
 					updatePlayTimes(id);
                 } else {
@@ -1002,12 +996,14 @@ function removeFav(id, name, favList) {
 function updatePlayTimes(id) {
 	//Specificly update a game
 	if (id) {
-		var data = $('span#'+id);
+		var data = $('span.'+id);
 		var stored = saveData[id];
 		var current = stored.timesPlayed;
 		for (var i = 0; i<data.length; i++) {
 			data[i].innerHTML = current + (current == 1 ? " time" : " times");
 		}
+		saveData[id] = {"timesPlayed": (timesPlayed+1), "lastPlayed": Date.parse(new Date)};
+		$.post('store.sh',JSON.stringify(saveData));
 	}
 	//No ID specified? Clear all the games
 	else {
@@ -1104,7 +1100,7 @@ function scrollDown() {
 /* * * * Experimental features * * * * */
 /* * * * * * * * * * * * * * * * * * * */
 /*
-//Experimental update from the web, currently only checks for updates, never actually called
+//Experimental update from the web
 function getLatest() {
 	if ($.browser.msie) {
 	var xdr = new XDomainRequest();
@@ -1112,7 +1108,6 @@ function getLatest() {
 					var current = data.about[1].value;
 					var latest = xdr.responseText;
 					if (current < latest) $().toastmessage('showNoticeToast', 'A new firmware is available for download: '+latest);
-					$('.toast-container').css('margin-left','-'+$('.toast-container').width()/2+'px');
 				}
 	xdr.open("get", 'http://devfaw.com/latest.php');
 	xdr.send();
@@ -1125,13 +1120,12 @@ function getLatest() {
 			success: function(latest) {
 				var current = data.about[1].value;
 				if (current < latest) $().toastmessage('showNoticeToast', 'A new firmware is available for download: '+latest);
-				$('.toast-container').css('margin-left','-'+$('.toast-container').width()/2+'px');
 			}
 		});
 	}
 }
 
-//The error system from earlier, needs work
+//The error system from earlier
 function getErrors() {
 	$.ajax({
 		type: "GET",
