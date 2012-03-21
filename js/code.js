@@ -452,7 +452,7 @@ function makeRecentTab() {
 //Create the About screen
 function makeAbout() {
 	//Long HTML ftw
-	$("#info").html('<ul data-role="listview" data-inset="true"><li>Web Interface version '+version+'</li><li>Interface created using jQuery Mobile</li><li>Cover Slide created using Galleria</li><li>Interface made by Mr_Waffle</li></ul><a id="resetStatsButton" href="#" onclick="resetStats()" data-inline="true" data-role="button">Reset Game Stats</a>');
+	$("#info").html('<ul data-role="listview" data-inset="true"><li>Web Interface version '+version+'</li><li>Interface created using jQuery Mobile</li><li>Cover Slide created using Galleria</li><li>Interface made by Mr_Waffle</li></ul><a id="resetStatsButton" href="#" onclick="resetStats()" data-inline="true" data-role="button">Reset Game Stats</a><br/><a id="resetFavsButton" href="#" onclick="resetFavs()" data-inline="true" data-role="button">Delete all Fav lists</a>');
 	$('<ul id="infolist" data-role="listview" data-inset="true">').prependTo("#info");
 	//All the info items from the xK3y
 	for (var i=0; i<data.about.length; i++) {
@@ -701,8 +701,9 @@ function getFavList(listName) {
 function addFavPopup(id, name) {
 	//Get all current list data
 	var savedFavLists = saveData['FavLists'];
+	console.log('Saved favlists raw:' +savedFavLists);
 	//If there are no lists made yet, create a popup asking for the first list EVAR
-	if (savedFavLists == null && $('#createFavList').length==0) {
+	if ($.isEmptyObject(savedFavLists)==true && $('#createFavList').length==0) {
 		noFavLists(id, name);
 		return;
 	}
@@ -713,6 +714,7 @@ function addFavPopup(id, name) {
 	for (var i in savedFavLists) {
 		favLists.push(i);
 	}
+	console.log('Saved favlists:' +favLists);
 	//Create ALL the list options!
 	var favListsHTML="";
 	for (var i=0;i<favLists.length;i++) {
@@ -831,8 +833,6 @@ function manageFavPopup(id, name) {
 
 //Create a new list, optional id and name argument to populate list on creation
 function createFavList(id, name, tabbed) {
-	//console.log(id);
-	//console.log(name);
 	//Create a new list, currently only possible through the popup, so we always get the value from there
 	var listName = escape($('#favListName')[0].value);
 	//Get the currently saved lists
@@ -1025,6 +1025,21 @@ function resetStats() {
 	}
 	$('#resetStatsButton>span>span').html("Done!");
 	var resetText = setTimeout("$('#resetStatsButton>span>span').html('Reset Game Stats')",3000);
+	//Update the visual playtimes
+	updatePlayTimes();
+	//Save to server
+	$.post('store.sh', JSON.stringify(saveData));
+}
+
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * * * Reset Favs  * * * * * * */
+/* * * * * * * * * * * * * * * * * * * */
+
+//Reset stats from the About menu
+function resetFavs() {
+	delete saveData['FavLists'];
+	$('#resetFavsButton>span>span').html("Done!");
+	var resetText = setTimeout("$('#resetFavsButton>span>span').html('Delete all Fav lists')",3000);
 	//Update the visual playtimes
 	updatePlayTimes();
 	//Save to server
