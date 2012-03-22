@@ -161,15 +161,15 @@ function getData() {
 //Make the Cover Slide
 function makeSlide() {
 	var ISOlist = data.ISOlist.slice();
-	ISOlist.sort(function(x,y) { 
-		var a = String(x.name).toUpperCase(); 
-		var b = String(y.name).toUpperCase(); 
-		if (a > b) 
-			return 1 
-		if (a < b) 
-			return -1 
-		return 0; 
-	}); 
+	ISOlist.sort(function(x,y) {
+		var a = String(x.name).toUpperCase();
+		var b = String(y.name).toUpperCase();
+		if (a > b)
+			return 1
+		if (a < b)
+			return -1
+		return 0;
+	});
 	var wwidth = ($(window).width()-30);
 	var wheight = $(window).height();
 	$('#slidepage').html('<div id="slidepanel" style="width:100%;text-align:center"></div>');
@@ -730,7 +730,7 @@ function addFavPopup(id, name) {
 	}
 	//If there's no popup yet, create one! Otherwise don't bother, there's already one ;)
 	if ($('#favListDropDown').length==0) {
-		$().toastmessage('showNormalToast', '<div class="favListAddToast"><label for="favListDropDown" class="select">Select a list to add this game to:</label><select name="favListDropDown" id="favListDropDown" data-theme="a" data-icon="star" data-inline="true">'+favListsHTML+'</select><a href="#" onclick="addFav(\''+id+'\',\''+name+'\',true)" data-role="button" data-inline="true" data-icon="check">Confirm</a><a href="#" onclick="$().toastmessage(\'removeToast\',$(\'.toast-item:last\'))" data-role="button" data-inline="true" data-icon="delete">Cancel</a></div>');
+		$().toastmessage('showNormalToast', '<div class="favListAddToast"><label for="favListDropDown" class="select">Select a list to add this game to:</label><select name="favListDropDown" id="favListDropDown" data-theme="a" data-icon="star" data-inline="true">'+favListsHTML+'</select><a href="#" onclick="addFav(\''+id+'\',\''+name+'\',true)" data-role="button" data-inline="true" data-icon="check">Confirm</a><hr/><label for="favListName">Or create a new list:</label><center><input id="favListName" style="max-width:200px" value="List Name" type="text"/></center><a onclick="createFavList(\''+id+'\',\''+name+'\',false)" href="#" data-role="button" data-inline="true">Create List</a><br/><a href="#" onclick="$().toastmessage(\'removeToast\',$(\'.toast-item:last\'))" data-role="button" data-inline="true" data-icon="delete">Cancel</a></div>');
 		scrollDown();
 		//JQM magic
 		$('.favListAddToast').trigger('create');
@@ -783,11 +783,17 @@ function manageFavPopup(id, name) {
 	var favListsHTML="";
 	for (var i=0;i<favLists.length;i++) {
 		//If from info popup
+		var flag=false;
 		if (id) {
-			//If the ID is found in a list, don't add that list to the HTML
-			if (findList(id).toString().indexOf(favLists[i])!=-1) {
-				continue;
+			var exists = findList(id);
+			for (var j=0;j<exists.length;j++) {
+				if (favLists[i]==exists[j]) {
+					flag=true;
+				}
 			}
+		}
+		if (flag) {
+			continue;
 		}
 		favListsHTML+='<option value="'+favLists[i]+'">'+unescape(favLists[i])+'</option>';
 	}
