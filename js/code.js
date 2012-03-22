@@ -43,6 +43,15 @@ $(document).delegate('#alpha', 'pagecreate',function(event) {
 	makeListTab();
 });
 
+$(window).delegate(window, 'orientationchange', function() {
+	$().toastmessage('showToast', {
+		text: 'Looks like you changed the screen orientation, it\'s advised to refresh the page',
+		type: "warning",
+		sticky: true,
+		close: function(){}
+	});
+});
+
 /* * * * * * * * * * * * * * * * * * * */
 /* * * * * * Data parsing  * * * * * * */
 /* * * * * * * * * * * * * * * * * * * */
