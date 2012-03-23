@@ -1,5 +1,5 @@
 //Current Web Interface version, update it!
-var version = "1.11";
+var version = "1.12";
 
 /** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **/
 /** ** ** ** ** ** ** Init  ** ** ** ** ** ** ** **/
@@ -92,16 +92,16 @@ function getData() {
 				par = $(this.parentNode).attr('NAME');
 				coversrc = "covers/"+id+".jpg";
 				isodata = { 
-						"layer" : "<a href=\"javascript:prepGame('"+id+"\','"+escape(iso)+"')\"><span><span>Play "+iso+"</span></span></a>", 
+						"layer" : "<a href=\"javascript:prepGame('"+id+"\','"+escape(iso)+"')\"><span><span>Play<br/>"+iso+"</span></span></a>", 
 						"id" : id, 
 						"name" : iso, 
-						"image" : coversrc, 
+						"image" : coversrc,
 						"title" : "FullScreen", 
 						"par" : par };
 				ISOlist.push(isodata);
 				//Cache images
 				cacheImage = new Image();
-				cacheImage.src = "covers/"+id+".jpg";
+				cacheImage.src = coversrc;
 				cache.push(cacheImage);
 			});
 			//Directories
