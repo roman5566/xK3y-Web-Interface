@@ -86,7 +86,7 @@ function getData() {
 						"layer" : "<a href=\"javascript:prepGame('"+id+"\','"+escape(iso)+"')\"><span><span>Play<br/>"+iso+"</span></span></a>", 
 						"id" : id, 
 						"name" : iso, 
-						"image" : coversrc,
+						"image" : 'img/nocover.jpg',
 						"title" : "FullScreen", 
 						"par" : par };
 				ISOlist.push(isodata);
@@ -1125,7 +1125,7 @@ function showBackground() {
 /* * * * * * * * * * * * * * * * * * * */
 
 function scrollDown() {
-	$('html,body').animate({scrollTop: document.body.scrollHeight}, 1000, function() {$.mobile.silentScroll(document.body.scrollHeight)});
+	$('html,body').animate({scrollTop: $('.toast-item:last').offset().top}, 1000, function() {$.mobile.silentScroll($('.toast-item:last').offset().top)});
 }
 
 function scrollUp() {
