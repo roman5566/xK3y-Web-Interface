@@ -43,15 +43,6 @@ $(document).delegate('#alpha', 'pagecreate',function(event) {
 	makeListTab();
 });
 
-$(window).delegate(window, 'orientationchange', function() {
-	$().toastmessage('showToast', {
-		text: 'Looks like you changed the screen orientation, it\'s advised to refresh the page',
-		type: "warning",
-		sticky: true,
-		close: function(){}
-	});
-});
-
 /* * * * * * * * * * * * * * * * * * * */
 /* * * * * * Data parsing  * * * * * * */
 /* * * * * * * * * * * * * * * * * * * */
@@ -139,6 +130,8 @@ function getData() {
 					//Experimental pre-loading of the probably most used menus
 					$.mobile.loadPage('#alpha');
 					$.mobile.loadPage('#chooser');
+					$.mobile.loadPage('#about');
+					Settings.init();
 				},
 				error: function() {
 					//Error? Probably old firmware, show error popup
@@ -153,6 +146,8 @@ function getData() {
 					//Experimental pre-loading of the probably most used menus
 					$.mobile.loadPage('#alpha');
 					$.mobile.loadPage('#chooser');
+					$.mobile.loadPage('#about');
+					Settings.init();
 				}
 			});
 		}
@@ -471,7 +466,7 @@ function makeRecentTab() {
 //Create the About screen
 function makeAbout() {
 	//Long HTML ftw
-	$("#info").html('<ul data-role="listview" data-inset="true"><li>Web Interface version '+version+'</li><li>Interface created using jQuery Mobile</li><li>Cover Slide created using Galleria</li><li>Interface made by Mr_Waffle</li></ul><a id="resetStatsButton" href="#" onclick="resetStats()" data-inline="true" data-role="button">Reset Game Stats</a><br/><a id="resetFavsButton" href="#" onclick="resetFavs()" data-inline="true" data-role="button">Delete all Fav lists</a>');
+	$("#info").html('<ul data-role="listview" data-inset="true"><li>Web Interface version '+version+'</li><li>Interface created using jQuery Mobile</li><li>Cover Slide created using Galleria</li><li>Interface made by Mr_Waffle</li></ul><ul data-role="listview" data-inset="true"><li>Settings:</br><input type="checkbox" onchange="Settings.orientationChange(this.checked)" name="checkbox-0" id="checkbox-mini-0" class="custom" data-mini="true" /><label for="checkbox-mini-0">Orientation change notification</label></li></ul><a id="resetStatsButton" href="#" onclick="resetStats()" data-inline="true" data-role="button">Reset Game Stats</a><br/><a id="resetFavsButton" href="#" onclick="resetFavs()" data-inline="true" data-role="button">Delete all Fav lists</a>');
 	$('<ul id="infolist" data-role="listview" data-inset="true">').prependTo("#info");
 	//All the info items from the xK3y
 	for (var i=0; i<data.about.length; i++) {
@@ -1131,6 +1126,61 @@ function showBackground() {
 
 function scrollDown() {
 	$('html,body').animate({scrollTop: document.body.scrollHeight}, 1000, function() {$.mobile.silentScroll(document.body.scrollHeight)});
+}
+
+function scrollUp() {
+	$('html,body').animate({scrollTop: 0}, 1000, function() {$.mobile.silentScroll(0)});
+}
+
+var Settings = {
+	'orientationChange': function(checkbox) {
+		if (checkbox) {
+			$(window).delegate(window, 'orientationchange', function() {
+				if ($('#orientationMessage').length==0) {
+					$().toastmessage('showToast', {
+						text: '<div id="orientationMessage">Looks like you changed the screen orientation, it\'s advised to refresh the page</div>',
+						type: "warning",
+						sticky: true,
+						close: function(){}
+					});
+					scrollUp();
+				}
+				else {
+					scrollUp();
+				}
+			});
+			var settings = saveData['Settings'];
+			if ($.isEmptyObject(settings)) {
+				settings = [];
+			}
+			settings.orientationNotification='false';
+			saveData['Settings']=settings;
+			$.post('store.sh', JSON.stringify(saveData));
+			$("#checkbox-mini-0").attr("checked",checkbox).checkboxradio("refresh");
+			console.log(checkbox);
+		}
+		else {
+			$(window).unbind('orientationchange');
+			var settings = saveData['Settings'];
+			if ($.isEmptyObject(settings)) {
+				settings = [];
+			}
+			settings.orientationNotification='true';
+			saveData['Settings']=settings;
+			$.post('store.sh', JSON.stringify(saveData));
+			$("#checkbox-mini-0").attr("checked",checkbox).checkboxradio("refresh");
+			console.log(checkbox);
+		}
+	},
+	
+	'init': function() {
+		var settings = saveData['Settings'];
+		var orientationCheck;
+		if ($.isEmptyObject(settings)) {
+			orientationCheck=true;
+		}
+		Settings.orientationChange(orientationCheck);
+	}
 }
 
 /* * * * * * * * * * * * * * * * * * * */
