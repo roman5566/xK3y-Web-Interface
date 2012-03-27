@@ -86,7 +86,7 @@ function getData() {
 						"layer" : "<a href=\"javascript:prepGame('"+id+"\','"+escape(iso)+"')\"><span><span>Play<br/>"+iso+"</span></span></a>", 
 						"id" : id, 
 						"name" : iso, 
-						"image" : 'img/nocover.jpg',
+						"image" : coversrc,
 						"title" : "FullScreen", 
 						"par" : par };
 				ISOlist.push(isodata);
@@ -1153,7 +1153,7 @@ var Settings = {
 			if ($.isEmptyObject(settings)) {
 				settings = [];
 			}
-			settings.orientationNotification='false';
+			settings.orientationNotification='true';
 			saveData['Settings']=settings;
 			$.post('store.sh', JSON.stringify(saveData));
 			$("#checkbox-mini-0").attr("checked",checkbox).checkboxradio("refresh");
@@ -1165,7 +1165,7 @@ var Settings = {
 			if ($.isEmptyObject(settings)) {
 				settings = [];
 			}
-			settings.orientationNotification='true';
+			settings.orientationNotification='false';
 			saveData['Settings']=settings;
 			$.post('store.sh', JSON.stringify(saveData));
 			$("#checkbox-mini-0").attr("checked",checkbox).checkboxradio("refresh");
@@ -1178,6 +1178,9 @@ var Settings = {
 		var orientationCheck;
 		if ($.isEmptyObject(settings)) {
 			orientationCheck=true;
+		}
+		else {
+			orientationCheck=settings.orientationNotification;
 		}
 		Settings.orientationChange(orientationCheck);
 	}
