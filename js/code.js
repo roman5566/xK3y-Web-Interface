@@ -12,6 +12,7 @@ var version = "1.12";
 //Add fitted logos to all pages
 $(document).ready(function() {
 	$('[data-role="page"]').each(function() {$(this).prepend('<img class="logo" src="img/logo.png" style="max-width:'+$(window).width()+"px"+';">')});
+	$('.logo:last').remove();
 	$.mobile.loadingMessage="caching...";
 	$.mobile.showPageLoadingMsg();
 });
@@ -84,10 +85,10 @@ function getData() {
 				coversrc = "covers/"+id+".jpg";
 				isodata = { 
 						"layer" : "<a href=\"javascript:prepGame('"+id+"\','"+escape(iso)+"')\"><span><span>Play<br/>"+iso+"</span></span></a>", 
-						"id" : id, 
-						"name" : iso, 
+						"id" : id,
+						"name" : iso,
 						"image" : coversrc,
-						"title" : "FullScreen", 
+						"title" : "FullScreen",
 						"par" : par };
 				ISOlist.push(isodata);
 				//Cache images
@@ -185,7 +186,7 @@ function makeSlide() {
 	//Add the jQuery Mobile classes to the layer
 	Galleria.ready(function(options) {
 		this.bind('loadfinish', function(e) {
-			$('.galleria-layer a').addClass('ui-btn ui-btn-up-c ui-btn-corner-all ui-shadow');
+			$('.galleria-layer a').addClass('ui-btn ui-btn-up-c ui-mini ui-btn-icon-left ui-btn-corner-all ui-shadow');
 			$('.galleria-layer > a > span').addClass('ui-btn-inner ui-btn-corner-all');
 			$('.galleria-layer > a > span > span').addClass('ui-btn-text');
 		});
@@ -505,11 +506,11 @@ function gameInfo(id, name) {
 			var favButton;
 			var favTest = findList(id);
 			//Game in not a single favlist? Give an Add button
-			if (favTest.length == 0) favButton = '<a onclick="addFavPopup(\''+id+'\',\''+name+'\')" href="#" data-role="button">Add to favorites</a>';
+			if (favTest.length == 0) favButton = '<a onclick="addFavPopup(\''+id+'\',\''+name+'\')" href="#" data-role="button" data-mini="true">Add to favorites</a>';
 			//Game in 1 or more favlists? Always show a "management" popup
-			else favButton = '<a onclick="manageFavPopup(\''+id+'\',\''+name+'\')" href="#" data-role="button">Manage favorites</a>';
+			else favButton = '<a onclick="manageFavPopup(\''+id+'\',\''+name+'\')" href="#" data-role="button" data-mini="true">Manage favorites</a>';
 			//HTML for the left part
-			var cover = '<img align="left" src="covers/'+id+'.jpg" style="width:'+($('#infoblock1').width()-10)+'px;"><br/>Tools<a onclick="launchGame(\''+id+'\')" href="#" data-role="button">Play Game</a>'+favButton+'<a onclick="$(\'#popup\').dialog(\'close\');$().toastmessage(\'removeToast\',$(\'.toast-item\'))" href="#" data-role="button">Close</a>'
+			var cover = '<img align="left" src="covers/'+id+'.jpg" style="width:'+($('#infoblock1').width()-10)+'px;"><br/>Tools<a onclick="launchGame(\''+id+'\')" href="#" data-role="button" data-mini="true">Play Game</a>'+favButton+'<a onclick="$(\'#popup\').dialog(\'close\');$().toastmessage(\'removeToast\',$(\'.toast-item\'))" href="#" data-role="button" data-mini="true">Close</a>'
 			//Apply HTML
 			$('#infoblock1').html(cover);
 			//Prepare title HTML
@@ -541,9 +542,9 @@ function gameInfo(id, name) {
 			//Same stuff as above
 			var favButton;
 			var favTest = findList(id);
-			if (favTest.length == 0) favButton = '<a onclick="addFavPopup(\''+id+'\',\''+name+'\')" href="#" data-role="button">Add to favorites</a>';
-			else favButton = '<a onclick="manageFavPopup(\''+id+'\',\''+name+'\')" href="#" data-role="button">Manage favorites</a>';
-			var cover = '<img align="left" src="covers/'+id+'.jpg" style="width:'+($('#infoblock1').width()-10)+'px;"><br/>Tools<a onclick="launchGame(\''+id+'\')" href="#" data-role="button">Play Game</a>'+favButton+'<a onclick="$(\'#popup\').dialog(\'close\');$().toastmessage(\'removeToast\',$(\'.toast-item\'))" href="#" data-role="button">Close</a>'
+			if (favTest.length == 0) favButton = '<a onclick="addFavPopup(\''+id+'\',\''+name+'\')" href="#" data-role="button" data-mini="true">Add to favorites</a>';
+			else favButton = '<a onclick="manageFavPopup(\''+id+'\',\''+name+'\')" href="#" data-role="button" data-mini="true">Manage favorites</a>';
+			var cover = '<img align="left" src="covers/'+id+'.jpg" style="width:'+($('#infoblock1').width()-10)+'px;"><br/>Tools<a onclick="launchGame(\''+id+'\')" href="#" data-role="button" data-mini="true">Play Game</a>'+favButton+'<a onclick="$(\'#popup\').dialog(\'close\');$().toastmessage(\'removeToast\',$(\'.toast-item\'))" href="#" data-role="button" data-mini="true">Close</a>'
 			$('#infoblock1').html(cover);
 			var title = unescape(name);
 			var info = '<div style="padding:5px;"><big><big><big>'+title+'</big></big></big><br/><br/><div id="infoItems"></div><br/>No Summary<br/></div>';
@@ -1153,7 +1154,7 @@ var Settings = {
 			if ($.isEmptyObject(settings)) {
 				settings = [];
 			}
-			settings.orientationNotification='true';
+			settings.orientationNotification=true;
 			saveData['Settings']=settings;
 			$.post('store.sh', JSON.stringify(saveData));
 			$("#checkbox-mini-0").attr("checked",checkbox).checkboxradio("refresh");
@@ -1165,7 +1166,7 @@ var Settings = {
 			if ($.isEmptyObject(settings)) {
 				settings = [];
 			}
-			settings.orientationNotification='false';
+			settings.orientationNotification=false;
 			saveData['Settings']=settings;
 			$.post('store.sh', JSON.stringify(saveData));
 			$("#checkbox-mini-0").attr("checked",checkbox).checkboxradio("refresh");
