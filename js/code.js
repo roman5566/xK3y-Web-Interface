@@ -1,5 +1,5 @@
 //Current Web Interface version, update it!
-var version = "1.12";
+var version = "1.14";
 
 /** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **/
 /** ** ** ** ** ** ** Init  ** ** ** ** ** ** ** **/
@@ -1152,7 +1152,7 @@ var Settings = {
 			});
 			var settings = saveData['Settings'];
 			if ($.isEmptyObject(settings)) {
-				settings = [];
+				settings = {};
 			}
 			settings['orientationNotification']=true;
 			saveData['Settings']=settings;
@@ -1164,7 +1164,7 @@ var Settings = {
 			$(window).unbind('orientationchange');
 			var settings = saveData['Settings'];
 			if ($.isEmptyObject(settings)) {
-				settings = [];
+				settings = {};
 			}
 			settings['orientationNotification']=false;
 			saveData['Settings']=settings;
