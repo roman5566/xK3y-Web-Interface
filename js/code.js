@@ -1154,10 +1154,10 @@ var Settings = {
 			if ($.isEmptyObject(settings)) {
 				settings = [];
 			}
-			settings.orientationNotification=true;
+			settings['orientationNotification']=true;
 			saveData['Settings']=settings;
 			$.post('store.sh', JSON.stringify(saveData));
-			$("#checkbox-mini-0").attr("checked",checkbox).checkboxradio("refresh");
+			$("#checkbox-mini-0").attr("checked",true).checkboxradio("refresh");
 			console.log(checkbox);
 		}
 		else {
@@ -1166,10 +1166,10 @@ var Settings = {
 			if ($.isEmptyObject(settings)) {
 				settings = [];
 			}
-			settings.orientationNotification=false;
+			settings['orientationNotification']=false;
 			saveData['Settings']=settings;
 			$.post('store.sh', JSON.stringify(saveData));
-			$("#checkbox-mini-0").attr("checked",checkbox).checkboxradio("refresh");
+			$("#checkbox-mini-0").attr("checked",false).checkboxradio("refresh");
 			console.log(checkbox);
 		}
 	},
@@ -1181,7 +1181,7 @@ var Settings = {
 			orientationCheck=true;
 		}
 		else {
-			orientationCheck=settings.orientationNotification;
+			orientationCheck=settings['orientationNotification'];
 		}
 		Settings.orientationChange(orientationCheck);
 	}
