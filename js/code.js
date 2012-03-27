@@ -13,8 +13,8 @@ var version = "1.14";
 $(document).ready(function() {
 	$('[data-role="page"]').each(function() {$(this).prepend('<img class="logo" src="img/logo.png" style="max-width:'+$(window).width()+"px"+';">')});
 	$('.logo:last').remove();
-	$.mobile.loadingMessage="caching...";
-	$.mobile.showPageLoadingMsg();
+	$.mobile.loadingMessageTextVisible=true
+	$.mobile.showPageLoadingMsg('b','caching & building...',false);
 });
 
 //Event to create Cover Slide
@@ -42,6 +42,11 @@ $(document).delegate('#about', 'pagecreate',function(event) {
 //Event to create Game List
 $(document).delegate('#alpha', 'pagecreate',function(event) {
 	makeListTab();
+});
+
+//Event to create Fav page
+$(document).delegate('#fav', 'pagecreate',function(event) {
+	makeFavListsTab();
 });
 
 /* * * * * * * * * * * * * * * * * * * */
@@ -568,8 +573,8 @@ function prepGame(id, name) {
 	gameInfo(id, name);
 	//There's a bug with the iPad if we're fullscreen in Cover Slide, kick it out.
 	//I don't know if there're other devices that have it, so we just always kick it out
-	var CoverSlide = Galleria.get(0);
-	if (CoverSlide) {
+	var CoverSlide = Galleria.get();
+	if (!$.isEmptyObject(CoverSlide)) {
 		if (CoverSlide.isFullscreen()) CoverSlide.exitFullscreen();
 	}
 }
@@ -631,9 +636,7 @@ function makeFavListsTab() {
 	
 	//To speed switching between tabs up, we hide the alphabetic list and show a short "special" list
 	//Because the special lists can change in one use, we always recreate those, but only load the alphabetic list once
-	$('#speclister').show();
-	$('#lister').hide();
-	$("#speclister").html('<ul id="speclist" data-role="listview" data-inset="true"></ul>');
+	$("#favpage").html('<ul id="speclist" data-role="listview" data-inset="true"></ul>');
 	$('<li data-role="list-divider">').html('<h3>Favorites</h3>').appendTo("#speclist");
 	
 	var savedFavLists = saveData['FavLists'];
@@ -653,13 +656,11 @@ function makeFavListsTab() {
 		}
 		tabHTML='<label for="favListSelector">Select a list!</label></h3><select name="favListSelector" id="favListSelector" data-theme="a" data-icon="arrow-d" onchange="getFavList(this.value)">'+favListsHTML+'</select><a onclick="manageFavPopup();showBackground()" href="#" data-role="button" data-icon="gear">Management</a>';
 	}
-	$('<div id="favTabOptions" class="ui-hide-label">').html(tabHTML).prependTo("#speclister");
+	$('<div id="favTabOptions" class="ui-hide-label">').html(tabHTML).prependTo("#favpage");
 	//Magic!
 	$("#speclist").listview();
-	$("#speclister").trigger('create');
-	//IE makes the bar disappear sometimes, remove and add it back!
-	$('#IEFix').removeClass('ui-header ui-bar-a');
-	$('#IEFix').addClass('ui-header ui-bar-a');
+	$("#favpage").trigger('create');
+	
 	if ($.isEmptyObject(savedFavLists)==false) {
 		getFavList(favLists[0]);
 	}
@@ -1128,6 +1129,10 @@ function showBackground() {
 function scrollDown() {
 	$('html,body').animate({scrollTop: $('.toast-item:last').offset().top}, 1000, function() {$.mobile.silentScroll($('.toast-item:last').offset().top)});
 }
+
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * Scroll to the top * * * * * */
+/* * * * * * * * * * * * * * * * * * * */
 
 function scrollUp() {
 	$('html,body').animate({scrollTop: 0}, 1000, function() {$.mobile.silentScroll(0)});
