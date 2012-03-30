@@ -390,7 +390,7 @@ function makeMostPlayedTab() {
 	//Native approach should be faster
 	document.getElementById('speclist').innerHTML=HTML;
 	//What if we don't have any games?
-	if ($('#speclist>li').length == 1) $('<li>').html('<h3>You haven\'t selected any games from this device yet!</h3><p></p>').appendTo("#speclist");	
+	if ($('#speclist>li').length == 1) $('<li>').html('<h3>You haven\'t selected any games yet!</h3><p></p>').appendTo("#speclist");	
 	//Magic!
 	$("#speclist").listview();
 	//IE makes the bar disappear sometimes, remove and add it back!
@@ -453,7 +453,7 @@ function makeRecentTab() {
 	//Date magic!
 	$(".easydate").easydate(); 
 			
-	if ($('#speclist>li').length == 1) $('<li>').html('<h3>You haven\'t selected any games from this device yet!</h3><p></p>').appendTo("#speclist");
+	if ($('#speclist>li').length == 1) $('<li>').html('<h3>You haven\'t selected any games yet!</h3><p></p>').appendTo("#speclist");
 	//Magic!
 	$("#speclist").listview();
 	//IE makes the bar disappear sometimes, remove and add it back!
@@ -575,7 +575,7 @@ function prepGame(id, name) {
 	//I don't know if there're other devices that have it, so we just always kick it out
 	var CoverSlide = Galleria.get();
 	if (!$.isEmptyObject(CoverSlide)) {
-		if (CoverSlide.isFullscreen()) CoverSlide.exitFullscreen();
+		if (CoverSlide[0].isFullscreen()) CoverSlide.exitFullscreen();
 	}
 }
 
@@ -787,6 +787,7 @@ function manageFavPopup(id, name) {
 	}
 	//Create ALL the list options!
 	var favListsHTML="";
+	var allFavListsHTML="";
 	for (var i=0;i<favLists.length;i++) {
 		//If from info popup
 		var flag=false;
@@ -802,6 +803,7 @@ function manageFavPopup(id, name) {
 			continue;
 		}
 		favListsHTML+='<option value="'+favLists[i]+'">'+unescape(favLists[i])+'</option>';
+		
 	}
 	//Preparing popup HTML
 	var managementHTML = '';
@@ -827,6 +829,7 @@ function manageFavPopup(id, name) {
 		createList='createFavList(null,null,true)';
 		//From favlist only options
 		if (favListsHTML.length > 1) {
+			managementHTML+='<label for="favListMassGameDropDown" class="select">Select a list to mass add games to:</label><select name="favListMassGameDropDown" id="favListMassGameDropDown" data-theme="a" data-icon="arrow-d" data-inline="true">'+favListsHTML+'</select><a href="#" onclick="massGamePopup()" data-role="button" data-inline="true">Select games</a><hr/>';
 			managementHTML+='<label for="ListRemoveDropDown" class="select">Select a list to remove:</label><select name="ListRemoveDropDown" id="ListRemoveDropDown" data-theme="a" data-icon="arrow-d" data-inline="true">'+favListsHTML+'</select><a href="#" onclick="removeFavList()" data-role="button" data-inline="true">Remove list</a><hr/>';
 		}
 	}
@@ -943,9 +946,9 @@ function removeFavList() {
 /* * * * * Add game to favlist * * * * */
 /* * * * * * * * * * * * * * * * * * * */
 
-//Add game to selected list, takes no list argument because we only allow adding from the info screen
-function addFav(id, name, init) {
-	var listName = $('#favListDropDown')[0].value;
+//Add game to selected list
+function addFav(id, name, init, list) {
+	var listName = (list ? list : $('#favListDropDown')[0].value);
 	//We already have a list, otherwise we wouldn't be able to get here, so no need to check for that
 	var favLists = saveData['FavLists'];
 	//Get the gameList array from the favLists object with the listName key
@@ -961,7 +964,12 @@ function addFav(id, name, init) {
 	//Save again
 	favLists[listName]=gameList;
 	saveData['FavLists'] = favLists;
-	$.post('store.sh', JSON.stringify(saveData));
+	if (list) {
+		return;
+	}
+	else {
+		$.post('store.sh', JSON.stringify(saveData));
+	}
 	//Remove the last toast upon completion
 	if (init) {
 		$().toastmessage('removeToast',$('.toast-item:last'));
@@ -1001,6 +1009,70 @@ function removeFav(id, name, favList) {
 	saveData['FavLists'] = favLists;
 	$.post('store.sh', JSON.stringify(saveData));
 	manageFavPopup(id,name);
+}
+
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * Mass game selection * * * * */
+/* * * * * * * * * * * * * * * * * * * */
+
+function massGamePopup() {
+	var listName = $('#favListMassGameDropDown')[0].value;
+	var favLists = saveData['FavLists'];
+	var gameList = favLists[listName];
+	
+	if ($('#massGamePopup').length==0) {
+		$().toastmessage('showToast', {
+			text: '<div id="massGamePopup" data-role="fieldcontain"></div>',
+			type: "normal",
+			sticky: true,
+			close : function(){}
+		});
+	}
+	
+	var ISOlist = data.ISOlist.slice();
+	//Make it alpabetically listed
+	ISOlist.sort(function(x,y) { 
+		var a = String(x.name).toUpperCase(); 
+		var b = String(y.name).toUpperCase(); 
+		if (a > b) 
+			return 1 
+		if (a < b) 
+			return -1 
+		return 0; 
+	}); 
+	
+	var iso;
+	var id;
+	var index;
+	var checktest;
+	var HTML='<fieldset id="massGameField" data-role="controlgroup"><legend>Games to add:</legend>';
+	for (var i=0;i<ISOlist.length;i++) {
+		iso = ISOlist[i].name;
+		id = ISOlist[i].id;
+		index = findIndex(gameList,id);
+		checktest='';
+		if (index != -1) {
+			checktest='checked="checked"';
+		}
+		HTML+='<input type="checkbox" name="'+id+'" id="'+escape(iso)+'" '+checktest+' class="custom" data-mini="true"/><label for="'+escape(iso)+'" id="'+id+'">'+iso+'</label>';
+	}
+	HTML+='</fieldset><a data-role="button" onclick="massGameAdding(\''+listName+'\')">Add games</a>';
+	document.getElementById('massGamePopup').innerHTML=HTML;
+	$('#massGamePopup').trigger('create');
+}
+
+function massGameAdding(listName) {
+	var allChecked = $('#massGameField').find('input[checked="checked"]');
+	var id, name;
+	var l=allChecked.length;
+	for (var i=0; i<l; i++) {
+		id = allChecked[i].attributes['name'].value;
+		name = allChecked[i].attributes['id'].value;
+		addFav(id, name, false, listName);
+	}
+	$().toastmessage('removeToast',$('.toast-item:last'));
+	$.post('store.sh', JSON.stringify(saveData));
+	
 }
 
 /** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **/
@@ -1138,6 +1210,10 @@ function scrollUp() {
 	$('html,body').animate({scrollTop: 0}, 1000, function() {$.mobile.silentScroll(0)});
 }
 
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * * * Settings  * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * */
+
 var Settings = {
 	'orientationChange': function(checkbox) {
 		if (checkbox) {
@@ -1163,7 +1239,6 @@ var Settings = {
 			saveData['Settings']=settings;
 			$.post('store.sh', JSON.stringify(saveData));
 			$("#checkbox-mini-0").attr("checked",true).checkboxradio("refresh");
-			console.log(checkbox);
 		}
 		else {
 			$(window).unbind('orientationchange');
@@ -1175,7 +1250,6 @@ var Settings = {
 			saveData['Settings']=settings;
 			$.post('store.sh', JSON.stringify(saveData));
 			$("#checkbox-mini-0").attr("checked",false).checkboxradio("refresh");
-			console.log(checkbox);
 		}
 	},
 	
