@@ -877,7 +877,7 @@ a.ui-link-inherit {
 /* Active class used as the "on" state across all themes
 -----------------------------------------------------------------------------------------------------------*/
 
-.ui-btn-active {
+.ui-btn-active, .activeGame {
 	border: 1px solid 		#6c943b /*{global-active-border}*/;
 	background: 			#7cac41 /*{global-active-background-color}*/;
 	font-weight: bold;

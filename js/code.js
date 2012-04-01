@@ -78,6 +78,7 @@ function getData() {
 			var coversrc;
 			var isodata;
 			var cacheImage;
+			var active;
 			//Array of HDDs
 			$(xml).find('MOUNT').each(function() {
 				drives.push($(this).attr('NAME'));
@@ -111,12 +112,14 @@ function getData() {
 			$(xml).find('ABOUT').find('ITEM').each(function() {
 				about.push({item: $(this).attr('NAME'), value: $(this).text()});
 			});
+			active=$(xml).find('ACTIVE').text();
 			//Put everything into the data JSON object
 			data = { 
 				"dirs" : dirs, 
 				"ISOlist" : ISOlist, 
 				"drives" : drives, 
-				"about" : about 
+				"about" : about,
+				"active" : active
 			};
 			//Serverside storage
 			$.ajax({
@@ -217,6 +220,8 @@ function makeFolderStructure() {
 	var stored;
 	var dataChange=false;
 	var timesPlayed;
+	var active=data.active;
+	var activeClass;
 	//Create directories first
 	for (var i=0; i<data.dirs.length; i++) {
 		dir = escape(data.dirs[i].dir);
@@ -253,7 +258,11 @@ function makeFolderStructure() {
 			par1 = escape(par1);
 			if ($('ul#'+par1).length==0) $('<ul id="'+par1+'" data-inset="true">').appendTo(document.getElementById(par));
 		}
-		$('<li>').html('<a href="#" onclick="prepGame(\''+id+'\',\''+escape(name)+'\')"><img src="'+cover+'"/><h3>'+name+'</h3><p>Played <span class="timesPlayed '+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a>').appendTo(document.getElementById(par1));
+		activeClass='';
+		if (id==active) {
+			activeClass=' class="activeGame"';
+		}
+		$('<li'+activeClass+'>').html('<a href="#" onclick="prepGame(\''+id+'\',\''+escape(name)+'\')"><img src="'+cover+'"/><h3>'+name+'</h3><p>Played <span class="timesPlayed '+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a>').appendTo(document.getElementById(par1));
 	};
 	//Prepend the ... 'folders' that go up a directory
 	$('ul[id$="-nest"]').each(function() {
@@ -299,6 +308,8 @@ function makeListTab() {
 	var stored;
 	var dataChange=false;
 	var timesPlayed;
+	var active = data.active;
+	var activeClass;
 	var HTML='';
 	//Add all the games to the list
 	for (var i=0;i<=ISOlist.length-1;i++) {
@@ -318,7 +329,11 @@ function makeListTab() {
 			HTML+='<li id="'+letter+'-divider" data-role="list-divider"><h3>'+letter+'</h3>';
 			//$('<li id="'+letter+'-divider" data-role="list-divider">').html('<h3>'+letter+'</h3>').appendTo("#isolist");
 		}
-		HTML+='<li><a href="#" onclick="prepGame(\''+id+'\',\''+escape(iso)+'\')"><img id="cover" src="'+cover+'"/><h3>'+iso+'</h3><p>Played <span class="timesPlayed '+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a>';
+		activeClass='';
+		if (id==active) {
+			activeClass=' class="activeGame"';
+		}
+		HTML+='<li'+activeClass+'><a href="#" onclick="prepGame(\''+id+'\',\''+escape(iso)+'\')"><img id="cover" src="'+cover+'"/><h3>'+iso+'</h3><p>Played <span class="timesPlayed '+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a>';
 		//$('<li id="'+iso+'">').html('<a href="#" onclick="prepGame(\''+id+'\',\''+escape(iso)+'\')"><img id="cover" src="'+cover+'"/><h3>'+iso+'</h3><p>Played <span class="timesPlayed" id="'+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a>').appendTo("#isolist");
 	}
 	//Native approach should be faster
@@ -370,6 +385,8 @@ function makeMostPlayedTab() {
 	var stored;
 	var dataChange=false;
 	var timesPlayed;
+	var active = data.active;
+	var activeClass;
 	var HTML='<li data-role="list-divider"><h3>Most Played</h3></li>';
 	//Add all the games to the list
 	for (var i=0;i<=ISOlist.length-1;i++) {
@@ -384,7 +401,11 @@ function makeMostPlayedTab() {
 			//Never played D: Get the hell out!
 			break;
 		}
-		HTML+='<li id="'+iso+'"><a href="#" onclick=\'prepGame(\"'+id+'\",\"'+escape(iso)+'\")\'><img id="cover" src="'+cover+'"/><h3>'+iso+'</h3><p>Played <span class="timesPlayed '+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a></li>';
+		activeClass='';
+		if (id==active) {
+			activeClass=' class="activeGame"';
+		}
+		HTML+='<li'+activeClass+' id="'+iso+'"><a href="#" onclick=\'prepGame(\"'+id+'\",\"'+escape(iso)+'\")\'><img id="cover" src="'+cover+'"/><h3>'+iso+'</h3><p>Played <span class="timesPlayed '+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a></li>';
 		//$('<li id="'+iso+'">').html('<a href="#" onclick=\'prepGame(\"'+id+'\",\"'+escape(iso)+'\")\'><img id="cover" src="'+cover+'"/><h3>'+iso+'</h3><p>Played <span class="timesPlayed" id="'+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a>').appendTo("#speclist");
 	}
 	//Native approach should be faster
@@ -431,6 +452,8 @@ function makeRecentTab() {
 	var cover;
 	var stored;
 	var lastPlayed;
+	var active = data.active;
+	var activeClass;
 	var dataChange=false;
 	var HTML='<li data-role="list-divider"><h3>Recently Played</h3></li>';
 	for (var i=0;i<ISOlist.length;i++) {
@@ -445,7 +468,11 @@ function makeRecentTab() {
 			//Never played D: Get the hell out!
 			break;
 		}
-		HTML+='<li id="'+iso+'"><a href="#" onclick=\'prepGame(\"'+id+'\",\"'+escape(iso)+'\")\'><img id="cover" src="'+cover+'"/><h3>'+iso+'</h3><p>Last played <span class="easydate" id="'+id+'">'+new Date(lastPlayed)+'</span></p></a></li>';
+		activeClass='';
+		if (id==active) {
+			activeClass=' class="activeGame"';
+		}
+		HTML+='<li'+activeClass+' id="'+iso+'"><a href="#" onclick=\'prepGame(\"'+id+'\",\"'+escape(iso)+'\")\'><img id="cover" src="'+cover+'"/><h3>'+iso+'</h3><p>Last played <span class="easydate" id="'+id+'">'+new Date(lastPlayed)+'</span></p></a></li>';
 		//$('<li id="'+iso+'">').html('<a href="#" onclick=\'prepGame(\"'+id+'\",\"'+escape(iso)+'\")\'><img id="cover" src="'+cover+'"/><h3>'+iso+'</h3><p>Last played <span class="easydate" id="'+id+'">'+new Date(lastPlayed)+'</span></p></a>').appendTo("#speclist");
 	}
 	//Native approach should be faster
@@ -601,6 +628,7 @@ function launchGame(id) {
                 $.get(url);
 				//Update the playtimes on the menus
 				updatePlayTimes(id);
+				updateActive(id);
             } else {
                 if (tray == 1 && guistate == 1) {
                     $().toastmessage('showNoticeToast', 'Please open your DVD tray.');
@@ -608,6 +636,7 @@ function launchGame(id) {
 					$.get(url);
 					//Update the playtimes on the menus
 					updatePlayTimes(id);
+					updateActive(id);
                 } else {
                     if (tray == 1 && guistate == 2) {
                         $().toastmessage('showNoticeToast', 'A game appears to be already loaded, please open your DVD tray and click "Play Game" again.');
@@ -679,6 +708,8 @@ function getFavList(listName) {
 	var stored;
 	var dataChange=false;
 	var timesPlayed;
+	var active = data.active;
+	var activeClass;
 	var HTML='<li data-role="list-divider"><h3>Favorites</h3></li>';
 	for (var i=0;i<games.length;i++) {
 		iso = games[i].name;
@@ -694,7 +725,11 @@ function getFavList(listName) {
 		else {
 			timesPlayed = stored.timesPlayed;
 		}
-		HTML+='<li id="'+iso+'"><a href="#" onclick="prepGame(\''+id+'\',\''+iso+'\')"><img id="cover" src="'+cover+'"/><h3>'+unescape(iso)+'</h3><p>Played <span class="timesPlayed" id="'+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a></li>';
+		activeClass='';
+		if (id==active) {
+			activeClass=' class="activeGame"';
+		}
+		HTML+='<li'+activeClass+' id="'+iso+'"><a href="#" onclick="prepGame(\''+id+'\',\''+iso+'\')"><img id="cover" src="'+cover+'"/><h3>'+unescape(iso)+'</h3><p>Played <span class="timesPlayed" id="'+id+'">'+timesPlayed+(timesPlayed == 1 ? " time" : " times")+'</span></p></a></li>';
 	}
 	//Native approach should be faster
 	document.getElementById('speclist').innerHTML=HTML;
@@ -1103,6 +1138,15 @@ function updatePlayTimes(id) {
 			data[i].innerHTML = "0 times";
 		}
 	}
+}
+
+/* * * * * * * * * * * * * * * * * * * */
+/* * * * * Update active game  * * * * */
+/* * * * * * * * * * * * * * * * * * * */
+
+function updateActive(id) {
+	$('.activeGame').removeClass('activeGame');
+	$('.'+id).parents('li').addClass('activeGame');
 }
 
 /* * * * * * * * * * * * * * * * * * * */
