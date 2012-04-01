@@ -19,10 +19,11 @@
 					<h1>Welcome</h1>
 				</div>
 				<div data-role="content">
-					<a href="#slide" data-role="button" data-icon="star">Cover Slide</a>
-					<a href="#alpha" data-role="button" data-icon="search">Game Listing</a>
-					<a href="#chooser" data-role="button" data-icon="grid">Folder Structure</a>
-					<a href="#about" data-role="button" data-icon="info">About</a>
+					<a href="#slide" data-role="button" data-icon="star" data-mini="true">Cover Slide</a>
+					<a href="#fav" data-role="button" data-icon="star" data-mini="true">Favorites</a>
+					<a href="#alpha" data-role="button" data-icon="search" data-mini="true">Game Listing</a>
+					<a href="#chooser" data-role="button" data-icon="grid" data-mini="true">Folder Structure</a>
+					<a href="#about" data-role="button" data-icon="info" data-mini="true">About</a>
 				</div>
 				<div data-role="footer">
 					<h4>xK3y Remote Web Interface</h4>
@@ -42,6 +43,20 @@
 					<h4>xK3y Remote Web Interface</h4>
 				</div>
 			</div>
+			
+			<!--Favorites page-->
+			<div data-role="page" id="fav" data-title="Favorites">
+				<!--Logo will be placed here-->
+				<div data-role="header">
+					<a href="#menu" data-direction="reverse" data-icon="home">Home</a>
+					<h1>Favorites</h1>
+				</div>
+				<div id="favpage" data-role="content"></div>
+				<div class="ui-bar ui-bar-a">
+					<a href="javascript:$.mobile.silentScroll();" data-icon="arrow-u" data-iconpos="notext">Top</a><br/>
+					<h4>xK3y Remote Web Interface</h4>
+				</div>
+			</div>
 		
 			<!--Game List page-->
 			<div data-role="page" id="alpha" data-title="Game Listing">
@@ -54,7 +69,6 @@
 							<li><a href="#" onclick="$('#speclister').hide();$('#lister').show();" data-icon="search" class="ui-btn-active">Alpabetic</a></li>
 							<li><a href="#" onclick="makeRecentTab();" data-icon="refresh">Recent</a></li>
 							<li><a href="#" onclick="makeMostPlayedTab();" data-icon="refresh">Most Played</a></li>
-							<li><a href="#" onclick="makeFavListsTab();" data-icon="star">Fav Lists</a></li>
 						</ul>
 					</div>
 				</div>
