@@ -1147,6 +1147,7 @@ function updatePlayTimes(id) {
 function updateActive(id) {
 	$('.activeGame').removeClass('activeGame');
 	$('.'+id).parents('li').addClass('activeGame');
+	data.active=id;
 }
 
 /* * * * * * * * * * * * * * * * * * * */
