@@ -45,7 +45,7 @@ $(document).delegate('#alpha', 'pagecreate',function(event) {
 });
 
 //Event to create Fav page
-$(document).delegate('#fav', 'pagecreate',function(event) {
+$(document).delegate('#fav', 'pagebeforeshow',function(event) {
 	makeFavListsTab();
 });
 
@@ -993,9 +993,13 @@ function addFav(id, name, init, list) {
 		gameList.splice(0,1);
 	}
 	//Push new game to array
-	gameList.push({
+	var inList = findList(id);
+	var index = findIndex(inList, listName, true);
+	if (index == -1) {
+		gameList.push({
 					"id" : id,
 					"name" : name });
+	}
 	//Save again
 	favLists[listName]=gameList;
 	saveData['FavLists'] = favLists;
@@ -1107,7 +1111,6 @@ function massGameAdding(listName) {
 	}
 	$().toastmessage('removeToast',$('.toast-item:last'));
 	$.post('store.sh', JSON.stringify(saveData));
-	
 }
 
 /** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **/
@@ -1224,9 +1227,16 @@ function findList(id) {
 
 //Find the index of a game ID
 //Again, genius :D
-function findIndex(array, id) {
-	for (var i=0; i<array.length; i++) {
-		if (array[i].id==id) return i;
+function findIndex(array, id, normal) {
+	if (normal) {
+		for (var i=0; i<array.length; i++) {
+			if (array[i]==id) return i;
+		}
+	}
+	else {
+		for (var i=0; i<array.length; i++) {
+			if (array[i].id==id) return i;
+		}
 	}
 	return -1;
 }
