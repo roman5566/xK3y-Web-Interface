@@ -45,7 +45,7 @@ $(document).delegate('#alpha', 'pagecreate',function(event) {
 });
 
 //Event to create Fav page
-$(document).delegate('#fav', 'pagecreate',function(event) {
+$(document).delegate('#fav', 'pagebeforeshow',function(event) {
 	makeFavListsTab();
 });
 
@@ -993,9 +993,13 @@ function addFav(id, name, init, list) {
 		gameList.splice(0,1);
 	}
 	//Push new game to array
-	gameList.push({
+	var inList = findList(id);
+	var index = findIndex(inList, listName, true);
+	if (index == -1) {
+		gameList.push({
 					"id" : id,
 					"name" : name });
+	}
 	//Save again
 	favLists[listName]=gameList;
 	saveData['FavLists'] = favLists;
@@ -1020,7 +1024,7 @@ function addFav(id, name, init, list) {
 /* * * * * * * * * * * * * * * * * * * */
 
 //Remove a game from a list from either a dropdown menu or argument
-function removeFav(id, name, favList) {
+function removeFav(id, name, favList, mass) {
 	var listName;
 	//Specify favList
 	if (favList) listName = favList;
@@ -1031,6 +1035,9 @@ function removeFav(id, name, favList) {
 	var gameList = favLists[listName];
 	//Find the index in the given array with the given ID
 	var index = findIndex(gameList, id);
+	if (index==-1) {
+		return;
+	}
 	//Slice it off
 	gameList.splice(index,1);
 	//If the new length == 0, fill with dummy data
@@ -1042,7 +1049,12 @@ function removeFav(id, name, favList) {
 	//Save
 	favLists[listName]=gameList;
 	saveData['FavLists'] = favLists;
-	$.post('store.sh', JSON.stringify(saveData));
+	if (mass) {
+		return;
+	}
+	else {
+		$.post('store.sh', JSON.stringify(saveData));
+	}
 	manageFavPopup(id,name);
 }
 
@@ -1091,13 +1103,14 @@ function massGamePopup() {
 		}
 		HTML+='<input type="checkbox" name="'+id+'" id="'+escape(iso)+'" '+checktest+' class="custom" data-mini="true"/><label for="'+escape(iso)+'" id="'+id+'">'+iso+'</label>';
 	}
-	HTML+='</fieldset><a data-role="button" onclick="massGameAdding(\''+listName+'\')">Add games</a>';
+	HTML+='</fieldset><a data-role="button" onclick="massGameAdding(\''+listName+'\')">Done</a>';
 	document.getElementById('massGamePopup').innerHTML=HTML;
 	$('#massGamePopup').trigger('create');
 }
 
 function massGameAdding(listName) {
 	var allChecked = $('#massGameField').find('input[checked="checked"]');
+	var allUnchecked = $('#massGameField').find('input').not('[checked="checked"]');
 	var id, name;
 	var l=allChecked.length;
 	for (var i=0; i<l; i++) {
@@ -1105,9 +1118,14 @@ function massGameAdding(listName) {
 		name = allChecked[i].attributes['id'].value;
 		addFav(id, name, false, listName);
 	}
+	var l=allUnchecked.length;
+	for (var i=0; i<l; i++) {
+		id = allUnchecked[i].attributes['name'].value;
+		name = allUnchecked[i].attributes['id'].value;
+		removeFav(id, name, listName, true);
+	}
 	$().toastmessage('removeToast',$('.toast-item:last'));
 	$.post('store.sh', JSON.stringify(saveData));
-	
 }
 
 /** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **/
@@ -1224,9 +1242,16 @@ function findList(id) {
 
 //Find the index of a game ID
 //Again, genius :D
-function findIndex(array, id) {
-	for (var i=0; i<array.length; i++) {
-		if (array[i].id==id) return i;
+function findIndex(array, id, normal) {
+	if (normal) {
+		for (var i=0; i<array.length; i++) {
+			if (array[i]==id) return i;
+		}
+	}
+	else {
+		for (var i=0; i<array.length; i++) {
+			if (array[i].id==id) return i;
+		}
 	}
 	return -1;
 }
