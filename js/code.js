@@ -1024,7 +1024,7 @@ function addFav(id, name, init, list) {
 /* * * * * * * * * * * * * * * * * * * */
 
 //Remove a game from a list from either a dropdown menu or argument
-function removeFav(id, name, favList) {
+function removeFav(id, name, favList, mass) {
 	var listName;
 	//Specify favList
 	if (favList) listName = favList;
@@ -1035,6 +1035,9 @@ function removeFav(id, name, favList) {
 	var gameList = favLists[listName];
 	//Find the index in the given array with the given ID
 	var index = findIndex(gameList, id);
+	if (index==-1) {
+		return;
+	}
 	//Slice it off
 	gameList.splice(index,1);
 	//If the new length == 0, fill with dummy data
@@ -1046,7 +1049,12 @@ function removeFav(id, name, favList) {
 	//Save
 	favLists[listName]=gameList;
 	saveData['FavLists'] = favLists;
-	$.post('store.sh', JSON.stringify(saveData));
+	if (mass) {
+		return;
+	}
+	else {
+		$.post('store.sh', JSON.stringify(saveData));
+	}
 	manageFavPopup(id,name);
 }
 
@@ -1095,19 +1103,26 @@ function massGamePopup() {
 		}
 		HTML+='<input type="checkbox" name="'+id+'" id="'+escape(iso)+'" '+checktest+' class="custom" data-mini="true"/><label for="'+escape(iso)+'" id="'+id+'">'+iso+'</label>';
 	}
-	HTML+='</fieldset><a data-role="button" onclick="massGameAdding(\''+listName+'\')">Add games</a>';
+	HTML+='</fieldset><a data-role="button" onclick="massGameAdding(\''+listName+'\')">Done</a>';
 	document.getElementById('massGamePopup').innerHTML=HTML;
 	$('#massGamePopup').trigger('create');
 }
 
 function massGameAdding(listName) {
 	var allChecked = $('#massGameField').find('input[checked="checked"]');
+	var allUnchecked = $('#massGameField').find('input').not('[checked="checked"]');
 	var id, name;
 	var l=allChecked.length;
 	for (var i=0; i<l; i++) {
 		id = allChecked[i].attributes['name'].value;
 		name = allChecked[i].attributes['id'].value;
 		addFav(id, name, false, listName);
+	}
+	var l=allUnchecked.length;
+	for (var i=0; i<l; i++) {
+		id = allUnchecked[i].attributes['name'].value;
+		name = allUnchecked[i].attributes['id'].value;
+		removeFav(id, name, listName, true);
 	}
 	$().toastmessage('removeToast',$('.toast-item:last'));
 	$.post('store.sh', JSON.stringify(saveData));
